@@ -1,0 +1,27 @@
+/////////                     SOLEDGE1                     /////////////
+/////////  Plugin to extract SolarEdge Solar data for Toon ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolarEdgeData")
+		var fingerprint = "69 01 51 C2 49 16 4A 38 93 FA 7C A8 E4 BC 61 9A 25 4B 98 BF"
+		var http = new XMLHttpRequest();
+		http.open("GET", "https://monitoringapi.solaredge.com/site/" + siteid + "/overview.json?api_key=" + apiKey, true)
+		if (debugOutput) console.log("*********SolarPanel solaredgeUrl: " + "https://monitoringapi.solaredge.com/site/" + siteid + "/overview.json?api_key=" + apiKey)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+					if (http.status === 200 || http.status === 300  || http.status === 302) {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						currentPower = parseInt(JsonObject.overview.currentPower.power)					
+						totalValue= Math.floor(JsonObject.overview.lifeTimeData.energy)
+						parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+					} else {
+						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+						parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+					}
+			}
+		}
+		http.send(fingerprint);
+    }
+	

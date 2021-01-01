@@ -1,0 +1,28 @@
+/////////                     KOSTAL1                     /////////////
+/////////  Plugin to extract Kostal Piko Solar data for Toon ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://pvserver:pvwr@" + urlString, true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					if (debugOutput) console.log("*********SolarPanel http.responseText: " +http.responseText)
+					var responseText = http.responseText
+					var kostalarray = responseText.split('bgcolor="#FFFFFF">')
+					for(var x in kostalarray){
+						if (isNaN(parseFloat(kostalarray[x]))){kostalarray[x]=0}
+					}
+					currentPower = parseInt(parseFloat(kostalarray[1]))					
+					totalValue= Math.floor(parseFloat(kostalarray[2]) * 1000)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	

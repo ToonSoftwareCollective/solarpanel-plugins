@@ -1,0 +1,10 @@
+{"plugins":[
+			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Password", "Username","","",""]},
+			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["","","SiteID", "APIKey",""]},
+			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["","","","","URL"]},
+			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["","","SiteID", "APIKey",""]},
+			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["","","","","URL"]},
+			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","","","URL"]},
+			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["","","","","URL"]}
+		]
+	}

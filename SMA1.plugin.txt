@@ -1,0 +1,72 @@
+/////////                     SMA1                     /////////////
+/////////  Plugin to extract SMA Solar data for Toon ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSmaStep1")
+		var http = new XMLHttpRequest()
+		var url = "https://" + urlString + "dyn/login.json"
+		var params = "{\"right\":\"istl\",\"pass\":\"" + passWord + "\"}"
+		if (debugOutput) console.log("*********SolarPanel params " + params)
+		http.open("POST", url, true);
+		http.setRequestHeader("Accept", "application/json, text/plain, */*")
+		http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+		http.setRequestHeader("Origin", "https://" + smaUrl)
+		http.setRequestHeader("Connection", "Keep-alive");
+		http.setRequestHeader("Content-length", params.length)
+
+		http.onreadystatechange = function() { // Call a function when the state changes.
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var smaSID = parseInt(JsonObject.result.sid)
+					if (debugOutput) console.log("*********SolarPanel Session ID " + smaSID)
+					getSmaStep2(smaSID, urlString)
+				} else {
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send(params);
+    }
+
+    function getSmaStep2(smaSID,urlString2){
+		if (debugOutput) console.log("*********SolarPanel Start getSmaStep2")
+		var http = new XMLHttpRequest()
+		var url2 = "https://" + smaUrl +  "getValues.json?sid=" + smaSID
+		var params = "{\"destDev\":[],\"keys\":[\"6400_00260100\",\"6400_00262200\",\"6100_40263F00\"]}"
+		if (debugOutput) console.log("*********SolarPanel params " + params)
+		http.open("POST", url2, true);
+		http.setRequestHeader("Accept", "application/json, text/plain, */*")
+		http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+		http.setRequestHeader("Connection", "Keep-alive");
+		http.setRequestHeader("Content-length", params.length)
+
+		http.onreadystatechange = function() { // Call a function when the state changes.
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					if (debugOutput) console.log("*********SolarPanel SMA: " + http.responseText)
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var ident1 = "012F-730B00E6"
+					var currentident = "6100_40263F00"
+					var totalident = "6400_00260100"
+					var zeroident = "0"
+					var oneident = "1"
+
+					if ( typeof(JsonObject.result.ident1.currentident.oneident.zeroident.val) != "undefined") currentPower = parseInt(JsonObject.result.ident1.currentident.oneident.zeroident.val)
+					if ( typeof(JsonObject.result.ident1.totalident.oneident.zeroident.val) != "undefined") totalValue = Math.floor(JsonObject.result.ident1.totalident.oneident.zeroident.val)	
+					parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+
+
+					
+	

@@ -1,0 +1,31 @@
+/////////                     FRONIUS1                     /////////////
+/////////  Plugin to extract Fronius Solar data for Toon ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getFroniusData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + "/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceID=1&DataCollection=CommonInverterData", true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var froniusCode = parseInt(JsonObject.Head.Status.Code)
+					if (froniusCode == 0) {    //All Ok
+						var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
+						if (froniusStatus == 7) {
+							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)					
+							totalValue= Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
+							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+						}
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	
