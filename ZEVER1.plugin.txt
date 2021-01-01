@@ -18,8 +18,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValueZever)
 							var zevensolarString = zeversolararray[11].split(".")
 							if (zevensolarString[1].length==1){todayValue = (parseFloat(zevensolarString[0] + ".0" + zevensolarString[1])).toFixed(2)}
 							if (zevensolarString[1].length==0 || zevensolarString[1].length==2){todayValue = parseFloat(zeversolararray[11]).toFixed(2)}
-							yearValue = parseInt(parseFloat(getArraySum(monthValues)))
-							totalValue= totalValueZever + todayValue
+							totalValue= totalValueZever + (todayValue*1000)
 							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 						}
 						if (zeversolararray[12]!="OK"){

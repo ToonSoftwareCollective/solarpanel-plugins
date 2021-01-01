@@ -40,7 +40,7 @@
                             var JsonString = http.responseText
                             var JsonObject= JSON.parse(JsonString)
                             currentPower = parseInt(JsonObject.powerValue)
-                            totalValue= Math.floor(JsonObject.totalValue)
+                            totalValue= Math.floor((JsonObject.totalValue)*1000)
 							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
