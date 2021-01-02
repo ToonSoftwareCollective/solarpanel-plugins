@@ -31,6 +31,6 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValueZever)
 				}
 			}
 		}
-		http.send(fingerprint);
+		http.send();
     }
 	
