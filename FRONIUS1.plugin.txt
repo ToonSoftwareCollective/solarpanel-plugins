@@ -19,6 +19,9 @@
 							totalValue= Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
 							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 						}
+						else{
+							currentPower = 0	
+						}
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
