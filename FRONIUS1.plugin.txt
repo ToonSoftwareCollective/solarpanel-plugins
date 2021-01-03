@@ -20,7 +20,8 @@
 							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 						}
 						else{
-							currentPower = 0	
+							currentPower = 0
+							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
 						}
 					}
 				} else {
