@@ -1,4 +1,4 @@
-/////////             <version>1.0.0<version>
+/////////             <version>1.0.0</version>
 /////////                     SOLEDGE1                     /////////////
 /////////  Plugin to extract SolarEdge Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
