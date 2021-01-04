@@ -1,4 +1,4 @@
-/////////             <version>1.0.0<version>
+/////////             <version>1.0.0</version>
 /////////                     KOSTAL1                     /////////////
 /////////  Plugin to extract Kostal Piko Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
