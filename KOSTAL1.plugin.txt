@@ -20,7 +20,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 					parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 				}
 			}
 		}
