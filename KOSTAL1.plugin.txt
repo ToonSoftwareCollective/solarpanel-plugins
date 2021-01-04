@@ -1,3 +1,4 @@
+1.0.0
 /////////                     KOSTAL1                     /////////////
 /////////  Plugin to extract Kostal Piko Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
