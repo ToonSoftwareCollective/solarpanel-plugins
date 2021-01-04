@@ -1,3 +1,4 @@
+1.0.0
 /////////                     FRONIUS1                     /////////////
 /////////  Plugin to extract Fronius Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
