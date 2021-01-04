@@ -21,9 +21,8 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValueZever)
 							totalValue= totalValueZever + (todayValue*1000)
 							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
 						}
-						if (zeversolararray[12]!="OK"){
-							currentPower = 0
-							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+						else{
+							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
 						}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
