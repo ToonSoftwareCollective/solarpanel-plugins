@@ -19,7 +19,7 @@
             http.onreadystatechange = function() { // Call a function when the state changes.
 				if (http.readyState === 4) {
 					if (http.status === 200) {
-						if (debugOutput) console.log("*********SolarPanel http.responseText : " http.responseText)
+						if (debugOutput) console.log("*********SolarPanel http.responseText : " + http.responseText)
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
 						var uid = JsonObject.data.uid
@@ -34,7 +34,7 @@
 					}
 				}
 			}
-            http.send(params);
+            http.send(vars);
     }
 
     function getStep2(uid,token, timestamp){
@@ -53,7 +53,7 @@
         http.onreadystatechange = function() { // Call a function when the state changes.
 				if (http.readyState === 4) {
 					if (http.status === 200) {
-						if (debugOutput) console.log("*********SolarPanel http.responseText : " http.responseText)
+						if (debugOutput) console.log("*********SolarPanel http.responseText : " + http.responseText)
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
 						var hasError = JsonObject.hasError
@@ -75,5 +75,5 @@
 					}
 				}
 		}
-		http.send();
+		http.send(vars);
     }
