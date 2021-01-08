@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     SOLEDGE1                     /////////////
 /////////  Plugin to extract SolarEdge Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -14,13 +14,14 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 					if (http.status === 200 || http.status === 300  || http.status === 302) {
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
+						var today2
 						currentPower = parseInt(JsonObject.overview.currentPower.power)	
 						today2 = Math.floor(JsonObject.overview.lastDayData.energy)
 						totalValue= Math.floor(JsonObject.overview.lifeTimeData.energy)
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					} else {
 						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0, http.status,"error")
+						parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
 					}
 			}
 		}
