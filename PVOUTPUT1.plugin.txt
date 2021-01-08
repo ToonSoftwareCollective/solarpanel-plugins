@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     PVOUTPUT1                     /////////////
 /////////  Plugin to extract PVoutput data for Toon         ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -14,9 +14,11 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
                         if (http.readyState === 4) {
                             if (http.status === 200) {
                                 if (debugOutput) console.log("*********SolarPanel PVOutput: " + http.responseText)
-                               var pvoutputararray = http.responseText.split(",")
+				var today2
+                                var pvoutputararray = http.responseText.split(",")
                                 currentPower = parseInt(pvoutputararray[1])
-                                getPVOutputData2(apiKey,siteid,currentPower)
+				today2 = parseInt(pvoutputararray[0])
+                                getPVOutputData2(apiKey,siteid,currentPower,today2)
                             } else {
                                 parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
                             }
@@ -25,7 +27,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
             http.send();
         }
 
-    function getPVOutputData2(apiKey,siteid,currentPower){
+    function getPVOutputData2(apiKey,siteid,currentPower,today2){
 		if (debugOutput) console.log("*********SolarPanel Start  getPVOutputData2")
 		var http = new XMLHttpRequest()
 		var url = "https://pvoutput.org/service/r2/getstatistic.jsp"
@@ -38,7 +40,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 					if (debugOutput) console.log("*********SolarPanel PVOutput4: " + http.responseText)
 					var pvoutputararray = http.responseText.split(",")
 					totalValue = parseInt(pvoutputararray[0])
-					parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
