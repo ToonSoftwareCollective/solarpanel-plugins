@@ -14,12 +14,13 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 					if (http.status === 200 || http.status === 300  || http.status === 302) {
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
-						currentPower = parseInt(JsonObject.overview.currentPower.power)					
+						currentPower = parseInt(JsonObject.overview.currentPower.power)	
+						today2 = Math.floor(JsonObject.overview.lastDayData.energy)
 						totalValue= Math.floor(JsonObject.overview.lifeTimeData.energy)
-						parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					} else {
 						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-						parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0, http.status,"error")
 					}
 			}
 		}
