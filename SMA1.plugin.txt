@@ -52,13 +52,18 @@
 					var JsonObject= JSON.parse(JsonString)
 					var ident1 = "012F-730B00E6"
 					var currentident = "6100_40263F00"
+					var dayident = "6400_00262200"
+
 					var totalident = "6400_00260100"
 					var zeroident = "0"
 					var oneident = "1"
+					var today2
 
 					if ( typeof(JsonObject.result.ident1.currentident.oneident.zeroident.val) != "undefined") currentPower = parseInt(JsonObject.result.ident1.currentident.oneident.zeroident.val)
+					if ( typeof(JsonObject.result.ident1.dayident.oneident.zeroident.val) != "undefined") today2 = Math.floor(JsonObject.result.ident1.dayident.oneident.zeroident.val  * 1000)
+					
 					if ( typeof(JsonObject.result.ident1.totalident.oneident.zeroident.val) != "undefined") totalValue = Math.floor(JsonObject.result.ident1.totalident.oneident.zeroident.val)	
-					parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
