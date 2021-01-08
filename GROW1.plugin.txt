@@ -1,6 +1,6 @@
 /////////             <version>1.0.5</version>
 /////////                     GROW1                        /////////////
-/////////  Plugin to extract Graowatt Solar data for Toon  ///////////////
+/////////  Plugin to extract Growatt Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
