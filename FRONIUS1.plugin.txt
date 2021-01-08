@@ -13,6 +13,7 @@
 					var JsonString = http.responseText
 					var JsonObject= JSON.parse(JsonString)
 					var froniusCode = parseInt(JsonObject.Head.Status.Code)
+					var today2
 					if (froniusCode == 0) {    //All Ok
 						var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
 						if (froniusStatus == 7) {
@@ -23,7 +24,7 @@
 						}
 						else{
 							currentPower = 0
-							parseReturnData(0,totalValue,today2,0,0,0,0,http.status,"succes")
+							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
 						}
 					}
 				} else {
