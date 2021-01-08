@@ -1,4 +1,5 @@
 {"plugins":[		
+			{"friendlyName":"Enphase Envoy", "filename":"ENPHASE1", "data": []},		
 			{"friendlyName":"Goodwe", "filename":"GOODWE1", "data": ["Password", "Username"]},
 			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Password", "Username"]},
 			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
