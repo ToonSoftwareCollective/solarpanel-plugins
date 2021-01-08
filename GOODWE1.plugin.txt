@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     GOODWE1                        /////////////
 /////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -58,13 +58,15 @@
 						var JsonObject= JSON.parse(JsonString)
 						var hasError = JsonObject.hasError
 						var succes = JsonObject.msg
+						var today2
 						if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
 						if(!hasError){
 							currentPower = currentPower = parseInt(JsonObject.data[0].pac)
+							today2 = Math.floor((JsonObject.data[0].eday)*1000)
 							totalValue = Math.floor((JsonObject.data[0].etotal)*1000)
 							if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
 							if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
-							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						} else {
 							if (debugOutput) console.log("*********SolarPanel Plugin error")
 							parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
