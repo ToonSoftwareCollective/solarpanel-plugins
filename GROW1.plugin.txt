@@ -20,7 +20,7 @@
                                  getGrowattStep2();
                             } else {
                                 if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-								parseReturnData(currentPower,todayValue,monthValue,yearValue,totalValue,0,0,0,0,0,0, http.status,"error")
+				parseReturnData(0,totalValue,today2,0,0,0,0, http.status,"error")
                             }
                         }
                     }
