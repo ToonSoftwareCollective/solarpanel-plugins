@@ -1,12 +1,13 @@
 {"plugins":[		
-			{"friendlyName":"Enphase Envoy", "filename":"ENPHASE1", "data": []},		
+			{"friendlyName":"Enphase Envoy", "filename":"ENPHASE1", "data": []},
+			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"]},
 			{"friendlyName":"Goodwe", "filename":"GOODWE1", "data": ["Password", "Username"]},
 			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Password", "Username"]},
-			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
-			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"]},
-			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"]},
 			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"]},
+			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Password", "Username"]},
+			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"]},
 			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]},
+			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"]}
 		]
 	}

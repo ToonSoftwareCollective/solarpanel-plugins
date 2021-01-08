@@ -1,0 +1,67 @@
+/////////             <version>1.0.1</version>
+/////////                     OMNIK1                        /////////////
+/////////  Plugin to extract Omnik Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
+		var http = new XMLHttpRequest()
+		var url = "https://api.omnikportal.com/v1/user/account_validate";
+		var vars = "user_email=" + userName +"&user_password=" + passWord +"&user_type=-1"
+		http.open("POST", url, true);
+		http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		http.setRequestHeader('app_key','Ox7yu3Eivicheinguth9ef9kohngo9oo');
+		http.setRequestHeader('app_id', '10038');
+		http.setRequestHeader('uid', '-1');
+		http.onreadystatechange = function() { // Call a function when the state changes.
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					if (debugOutput) console.log("*********SolarPanel http.responseText : " + http.responseText)
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var user_id = JsonObject.data.c_user_id
+					if (debugOutput) console.log("*********SolarPanel uid : " + user_id)
+					getStep2(user_id)
+				}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send(vars);
+    }
+
+    function getStep2(uid,token, timestamp){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep2")
+		var http = new XMLHttpRequest()
+		var url = "https://api.omnikportal.com/v1/plant/list?page=1&perpage=20&locale=en-US HTTP/1.1";
+		http.open("GET", url, true);
+		http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		http.setRequestHeader('app_key','Ox7yu3Eivicheinguth9ef9kohngo9oo');
+		http.setRequestHeader('app_id', '10038');
+		http.setRequestHeader('uid', user_id);
+		http.onreadystatechange = function() { // Call a function when the state changes.
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					console.log(http.responseText)
+					var today2
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					currentPower = parseInt(JsonObject.data.plants[0].current_power * 1000)
+					today2 = parseInt(JsonObject.data.plants[0].today_energy  * 1000)
+					totalValue = parseInt(JsonObject.data.plants[0].total_energy  * 1000)
+					if (isNaN(currentPower))currentPower=0
+					if (isNaN(today2))today2=0
+					if (isNaN(totalValue))totalValue=0
+					if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
+					if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
+					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+				} else {
+					if (debugOutput) console.log("*********SolarPanel Plugin error")
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
