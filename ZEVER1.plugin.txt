@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     ZEVER1                         /////////////
 /////////  Plugin to extract ZeverSolar Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                    ///////////////
@@ -16,11 +16,13 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValueZever)
 						var zeversolararray = responseText.split("\n")
 						if (zeversolararray[12]=="OK"){
 							currentPower = parseInt(parseFloat(zeversolararray[10]))
+							var today2
 							var zevensolarString = zeversolararray[11].split(".")
-							if (zevensolarString[1].length==1){todayValue = (parseFloat(zevensolarString[0] + ".0" + zevensolarString[1])).toFixed(2)}
-							if (zevensolarString[1].length==0 || zevensolarString[1].length==2){todayValue = parseFloat(zeversolararray[11]).toFixed(2)}
-							totalValue= totalValueZever + (todayValue*1000)
-							parseReturnData(currentPower,totalValue,0,0,0,0,0,http.status,"succes")
+							if (zevensolarString[1].length==1){today2 = (parseFloat(zevensolarString[0] + ".0" + zevensolarString[1])).toFixed(2)}
+							if (zevensolarString[1].length==0 || zevensolarString[1].length==2){today2 = parseFloat(zeversolararray[11]).toFixed(2)}
+							today2 = today2*1000
+							totalValue= totalValueZever + (today2)
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
 						else{
 							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
@@ -34,3 +36,4 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValueZever)
 		http.send();
     }
 	
+
