@@ -1,4 +1,4 @@
-/////////             <version>1.0.5</version>
+/////////             <version>1.0.6</version>
 /////////                     GROW1                        /////////////
 /////////  Plugin to extract Growatt Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -20,7 +20,7 @@
                                  getGrowattStep2();
                             } else {
                                 if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-				parseReturnData(0,totalValue,today2,0,0,0,0, http.status,"error")
+				parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
                             }
                         }
                     }
@@ -46,7 +46,7 @@
 			    parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(0,totalValue,today2,0,0,0,0, http.status,"error")
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 				}
 			}
 		}
