@@ -1,5 +1,5 @@
 {"plugins":[		
-			{"friendlyName":"Enphase Envoy", "filename":"ENPHASE1", "data": []},
+			{"friendlyName":"Enphase Envoy", "filename":"ENPHASE1", "data": ["URL"]},
 			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"]},
 			{"friendlyName":"Goodwe", "filename":"GOODWE1", "data": ["Password", "Username"]},
 			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Password", "Username"]},
