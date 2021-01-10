@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     SMA1                     /////////////
 /////////  Plugin to extract SMA Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -6,13 +6,13 @@
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getSmaStep1")
 		var http = new XMLHttpRequest()
-		var url = "https://" + urlString + "dyn/login.json"
+		var url = "https://" + urlString + "/dyn/login.json"
 		var params = "{\"right\":\"istl\",\"pass\":\"" + passWord + "\"}"
 		if (debugOutput) console.log("*********SolarPanel params " + params)
 		http.open("POST", url, true);
 		http.setRequestHeader("Accept", "application/json, text/plain, */*")
 		http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
-		http.setRequestHeader("Origin", "https://" + smaUrl)
+		http.setRequestHeader("Origin", "https://" + urlString)
 		http.setRequestHeader("Connection", "Keep-alive");
 		http.setRequestHeader("Content-length", params.length)
 
@@ -35,7 +35,7 @@
     function getSmaStep2(smaSID,urlString2){
 		if (debugOutput) console.log("*********SolarPanel Start getSmaStep2")
 		var http = new XMLHttpRequest()
-		var url2 = "https://" + smaUrl +  "getValues.json?sid=" + smaSID
+		var url2 = "https://" + urlString2 +  "/getValues.json?sid=" + smaSID
 		var params = "{\"destDev\":[],\"keys\":[\"6400_00260100\",\"6400_00262200\",\"6100_40263F00\"]}"
 		if (debugOutput) console.log("*********SolarPanel params " + params)
 		http.open("POST", url2, true);
@@ -73,6 +73,9 @@
 		http.send();
     }
 
+
+					
+	
 
 					
 	
