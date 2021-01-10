@@ -61,7 +61,7 @@
 						var today2
 						if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
 						if(!hasError){
-							currentPower = currentPower = parseInt(JsonObject.data[0].pac)
+							currentPower = parseInt(JsonObject.data[0].pac)
 							today2 = Math.floor((JsonObject.data[0].eday)*1000)
 							totalValue = Math.floor((JsonObject.data[0].etotal)*1000)
 							if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)

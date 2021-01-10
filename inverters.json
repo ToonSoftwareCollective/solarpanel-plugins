@@ -8,6 +8,7 @@
 			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"]},
 			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]},
 			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
+			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Password", "Username"]},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"]}
 		]
 	}
