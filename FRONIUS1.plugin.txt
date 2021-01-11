@@ -19,7 +19,7 @@
 						if (froniusStatus == 7) {
 							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)					
 							totalValue= Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
-							today2 =  Math.floor((JsonObject.Body.Data.DAY_ENERGY.Value)
+							today2 =  Math.floor(JsonObject.Body.Data.DAY_ENERGY.Value)
 							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
 						else{
