@@ -1,0 +1,7 @@
+{"plugins":[		
+			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
+			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Password", "Username"]},
+			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]},
+		]
+	}
+© 2021 GitHub, Inc.
