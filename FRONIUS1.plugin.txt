@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     FRONIUS1                     /////////////
 /////////  Plugin to extract Fronius Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -29,12 +29,12 @@
 						}
 						else{
 							currentPower = 0
-							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
+							parseReturnData(0,totalValue,todayValue,0,0,0,0,http.status,"succes")
 						}
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+					parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
 				}
 			}
 		}
