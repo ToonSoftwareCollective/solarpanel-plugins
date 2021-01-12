@@ -17,8 +17,13 @@
 					if (froniusCode == 0) {    //All Ok
 						var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
 						if (froniusStatus == 7) {
-							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)					
-							totalValue= Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
+							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)
+							var tempTotalValue = Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
+							if (isNaN(tempTotalValue)){
+								totalValue=totalValue
+							}else{
+								totalValue= tempTotalValue
+							}
 							today2 =  Math.floor(JsonObject.Body.Data.DAY_ENERGY.Value)
 							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
