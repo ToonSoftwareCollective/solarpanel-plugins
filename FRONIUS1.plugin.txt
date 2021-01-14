@@ -1,4 +1,4 @@
-/////////             <version>1.0.3</version>
+/////////             <version>1.0.4</version>
 /////////                     FRONIUS1                     /////////////
 /////////  Plugin to extract Fronius Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -18,19 +18,13 @@
 						var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
 						if (froniusStatus == 7) {
 							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)
-							var tempTotalValue = Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
-							if (isNaN(tempTotalValue)){
-								totalValue=totalValue
-							}else{
-								totalValue= tempTotalValue
-							}
-							today2 =  Math.floor(JsonObject.Body.Data.DAY_ENERGY.Value)
-							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
 						else{
 							currentPower = 0
-							parseReturnData(0,totalValue,todayValue,0,0,0,0,http.status,"succes")
 						}
+						totalValue = Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
+						today2 =  Math.floor(JsonObject.Body.Data.DAY_ENERGY.Value)
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
