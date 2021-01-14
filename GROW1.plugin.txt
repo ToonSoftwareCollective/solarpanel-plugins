@@ -7,7 +7,7 @@
             if (debugOutput) console.log("*********SolarPanel Start getGrowattStep1")
 			
 			//modified hash : if first of pairs  is 0 then replace by c
-			var newpass= Qt.md5(password)
+			var newpass= Qt.md5(passWord)
             var newString =""
             for(var x = 0;x < newpass.length ;x++){
                 console.log("char: " +newpass[x])
