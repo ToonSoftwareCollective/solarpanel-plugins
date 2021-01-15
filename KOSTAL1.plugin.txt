@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     KOSTAL1                     /////////////
 /////////  Plugin to extract Kostal Piko Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -9,18 +9,23 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
-					if (debugOutput) console.log("*********SolarPanel http.responseText: " +http.responseText)
-					var responseText = http.responseText
-					var today2
-					var kostalarray = responseText.split('bgcolor="#FFFFFF">')
-					for(var x in kostalarray){
-						if (isNaN(parseFloat(kostalarray[x]))){kostalarray[x]=0}
-					}
-					currentPower = parseInt(parseFloat(kostalarray[1]))
-					todayValue = Math.floor(parseFloat(kostalarray[3]) * 1000)
+					try {
+						var responseText = http.responseText
+						var today2
+						var kostalarray = responseText.split('bgcolor="#FFFFFF">')
+						for(var x in kostalarray){
+							if (isNaN(parseFloat(kostalarray[x]))){kostalarray[x]=0}
+						}
+						currentPower = parseInt(parseFloat(kostalarray[1]))
+						todayValue = Math.floor(parseFloat(kostalarray[3]) * 1000)
 
-					totalValue= Math.floor(parseFloat(kostalarray[2]) * 1000)
-					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						totalValue= Math.floor(parseFloat(kostalarray[2]) * 1000)
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")

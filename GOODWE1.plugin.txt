@@ -1,4 +1,4 @@
-/////////             <version>1.0.2</version>
+/////////             <version>1.0.3</version>
 /////////                     GOODWE1                        /////////////
 /////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -19,15 +19,20 @@
             http.onreadystatechange = function() { // Call a function when the state changes.
 				if (http.readyState === 4) {
 					if (http.status === 200) {
-						if (debugOutput) console.log("*********SolarPanel http.responseText : " + http.responseText)
-						var JsonString = http.responseText
-						var JsonObject= JSON.parse(JsonString)
-						var uid = JsonObject.data.uid
-						var token = JsonObject.data.token
-						var timestamp = JsonObject.data.timestamp
-						if (debugOutput) console.log("*********SolarPanel uid : " + uid)
-						if (debugOutput) console.log("*********SolarPanel token : " + token)
-						getStep2(uid,token, timestamp)
+						try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							var uid = JsonObject.data.uid
+							var token = JsonObject.data.token
+							var timestamp = JsonObject.data.timestamp
+							if (debugOutput) console.log("*********SolarPanel uid : " + uid)
+							if (debugOutput) console.log("*********SolarPanel token : " + token)
+							getStep2(uid,token, timestamp)
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
 					} else {
 						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
@@ -53,23 +58,28 @@
         http.onreadystatechange = function() { // Call a function when the state changes.
 				if (http.readyState === 4) {
 					if (http.status === 200) {
-						if (debugOutput) console.log("*********SolarPanel http.responseText : " + http.responseText)
-						var JsonString = http.responseText
-						var JsonObject= JSON.parse(JsonString)
-						var hasError = JsonObject.hasError
-						var succes = JsonObject.msg
-						var today2
-						if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
-						if(!hasError){
-							currentPower = parseInt(JsonObject.data[0].pac)
-							today2 = Math.floor((JsonObject.data[0].eday)*1000)
-							totalValue = Math.floor((JsonObject.data[0].etotal)*1000)
-							if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
-							if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
-							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
-						} else {
-							if (debugOutput) console.log("*********SolarPanel Plugin error")
-							parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+						try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							var hasError = JsonObject.hasError
+							var succes = JsonObject.msg
+							var today2
+							if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
+							if(!hasError){
+								currentPower = parseInt(JsonObject.data[0].pac)
+								today2 = Math.floor((JsonObject.data[0].eday)*1000)
+								totalValue = Math.floor((JsonObject.data[0].etotal)*1000)
+								if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
+								if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
+								parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+							} else {
+								if (debugOutput) console.log("*********SolarPanel Plugin error")
+								parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+							}
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 						}
 					} else {
 						if (debugOutput) console.log("*********SolarPanel error: " + http.status)

@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     SOLIS1                        	 /////////////
 /////////  Plugin to extract Ginglong Solis Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                 		 ///////////////
@@ -7,23 +7,24 @@
         if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
         var http = new XMLHttpRequest()
         var url = "http://apic-cdn.solarman.cn/v/ap.2.0/cust/user/login?user_id=" + userName+ "&user_pass=" + passWord
-		if (debugOutput) console.log("*********SolarPanel url : " + url)
         http.open("GET", url, true);
         http.onreadystatechange = function() { // Call a function when the state changes.
              if (http.readyState === 4) {
                     if (http.status === 200) {
-                        if (debugOutput) console.log("*********SolarPanel http.responseText :" + http.responseText)
-                        var JsonString = http.responseText
-                        var JsonObject= JSON.parse(JsonString)
-                        if (parseInt(JsonObject.result) === 5){if (debugOutput) cconsole.log("*********SolarPanel Wrong password")}
-                        if (parseInt(JsonObject.result) === 11){if (debugOutput) console.log("*********SolarPanel Wrong username")}
-                        var token = JsonObject.token
-                        if (debugOutput) console.log("*********SolarPanel token : " + token)
-                        var uid = JsonObject.uid
-                        if (debugOutput) console.log("*********SolarPanel uid : " + uid)
-                        getStep2(uid,token)
+                        try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							if (parseInt(JsonObject.result) === 5){if (debugOutput) cconsole.log("*********SolarPanel Wrong password")}
+							if (parseInt(JsonObject.result) === 11){if (debugOutput) console.log("*********SolarPanel Wrong username")}
+							var token = JsonObject.token
+							var uid = JsonObject.uid
+							getStep2(uid,token)
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
 					} else {
-						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 					}
 				}
@@ -36,21 +37,23 @@
         if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep2")
 		var http = new XMLHttpRequest()
 		var url = "http://apic-cdn.solarman.cn/v/ap.2.0/plant/find_plant_list?uid=" + uid + "&sel_scope=1&sort_type=1"
-		if (debugOutput) console.log("*********SolarPanel url : " + url)
 		http.open("GET", url, true);
 		http.setRequestHeader('token', token);
 		http.onreadystatechange = function() { // Call a function when the state changes.
 			if (http.readyState === 4) {
 				if (http.status === 200) {
-					if (debugOutput) console.log("*********SolarPanel http.responseText :" + http.responseText)
-					var today2
-					var JsonString = http.responseText
-					var JsonObject= JSON.parse(JsonString)
-					var plant_id = JsonObject.list[0].plant_id
-					if (debugOutput) console.log("*********SolarPanel plant_id : " + plant_id)
-					getStep3(uid,token,plant_id)
+					try {
+						var today2
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var plant_id = JsonObject.list[0].plant_id
+						getStep3(uid,token,plant_id)
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
 				} else {
-					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 				}
 			}
@@ -68,19 +71,23 @@
             http.onreadystatechange = function() { // Call a function when the state changes.
                 if (http.readyState === 4) {
                     if (http.status === 200) {
-                        if (debugOutput) console.log("*********SolarPanel http.responseText :" + http.responseText)
-                        var today2
-                        var JsonString = http.responseText
-                        var JsonObject= JSON.parse(JsonString)
-                        currentPower = parseInt(JsonObject.power_out.power)
-                        today2 = parseInt(JsonObject.power_out.energy_day  * 1000)
-                        totalValue = parseInt(JsonObject.power_out.energy_accu  * 1000)
-                        if (isNaN(currentPower))currentPower=0
-                        if (isNaN(today2))today2=0
-                        if (isNaN(totalValue))totalValue=0
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+                        try {
+							var today2
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							currentPower = parseInt(JsonObject.power_out.power)
+							today2 = parseInt(JsonObject.power_out.energy_day  * 1000)
+							totalValue = parseInt(JsonObject.power_out.energy_accu  * 1000)
+							if (isNaN(currentPower))currentPower=0
+							if (isNaN(today2))today2=0
+							if (isNaN(totalValue))totalValue=0
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
 					} else {
-						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 					}
 				}

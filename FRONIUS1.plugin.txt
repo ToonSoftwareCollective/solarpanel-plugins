@@ -1,4 +1,4 @@
-/////////             <version>1.0.4</version>
+/////////             <version>1.0.6</version>
 /////////                     FRONIUS1                     /////////////
 /////////  Plugin to extract Fronius Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -11,27 +11,32 @@
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
 					var JsonString = http.responseText
-					var JsonObject= JSON.parse(JsonString)
-					var froniusCode = parseInt(JsonObject.Head.Status.Code)
-					var today2
-					if (froniusCode == 0) {    //All Ok
-						var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
-						if (froniusStatus == 7) {
-							currentPower = parseInt(JsonObject.Body.Data.PAC.Value)
+					try {
+						var JsonObject= JSON.parse(JsonString)
+						var froniusCode = parseInt(JsonObject.Head.Status.Code)
+						var today2
+						if (froniusCode == 0) {    //All Ok
+							var froniusStatus = parseInt(JsonObject.Body.Data.DeviceStatus.StatusCode)
+							if (froniusStatus == 7) {
+								currentPower = parseInt(JsonObject.Body.Data.PAC.Value)
+							}
+							else{
+								currentPower = 0
+							}
+							totalValue = parseInt(JsonObject.Body.Data.TOTAL_ENERGY.Value)
+							today2 =  parseInt(JsonObject.Body.Data.DAY_ENERGY.Value)
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
-						else{
-							currentPower = 0
-						}
-						totalValue = Math.floor(JsonObject.Body.Data.TOTAL_ENERGY.Value)
-						today2 =  Math.floor(JsonObject.Body.Data.DAY_ENERGY.Value)
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 					}
 				} else {
-					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 				}
 			}
 		}
 		http.send();
     }
-	
+		
