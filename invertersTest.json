@@ -1,6 +1,6 @@
 {"plugins":[		
 			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
-			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Password", "Username"]},
+			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"]},
 			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]}
 		]
 	}
