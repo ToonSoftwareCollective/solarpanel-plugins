@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     DOM-DOUBLE1                          /////////////
 /////////  Plugin to extract Domoticz (Double) Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                          ///////////////
@@ -55,7 +55,6 @@
 		}
 		http.send();
     }
-	
 	
 	function getStep3(secondIDX,urlString,currentPower,today,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
