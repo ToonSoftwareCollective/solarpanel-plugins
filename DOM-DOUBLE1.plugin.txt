@@ -1,0 +1,87 @@
+/////////             <version>1.0.0</version>
+/////////                     DOM-DOUBLE1                          /////////////
+/////////  Plugin to extract Domoticz (Double) Solar data for Toon ///////////////
+/////////                   By Oepi-Loepi                          ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		var arraynew = apiKey.split("+")
+		var firstIDX
+		var secondIDX
+		var number
+
+		if (arraynew.length == 1){
+			firstIDX = arraynew[0].trim()
+			number = 1
+		} 
+		if (arraynew.length == 2){
+			firstIDX = arraynew[0].trim()
+			secondIDX = arraynew[1].trim()
+			number = 2
+		}	   
+		getStep2(number,firstIDX,secondIDX,urlString,totalValue)
+
+    }
+		
+	function getStep2(number,firstIDX,secondIDX,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + ":8080/json.htm?type=devices&rid=" + firstIDX, true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var today2
+						currentPower = parseInt(JsonObject.result[0].Usage)
+						today2=(parseFloat(JsonObject.result[0].CounterToday))*1000
+						totalValue= (parseFloat(JsonObject.result[0].Data))*1000
+						
+						if (number == 1){
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						}else{
+							getStep3(secondIDX,urlString,currentPower,today2,totalValue)
+						}
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	
+	
+	function etStep3(secondIDX,urlString,currentPower,today2,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + ":8080/json.htm?type=devices&rid=" + secondIDX, true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var today2
+						currentPower = currentPower + parseInt(JsonObject.result[0].Usage)
+						today2= today2 + ((parseFloat(JsonObject.result[0].CounterToday))*1000)
+						totalValue= totalValue + ((parseFloat(JsonObject.result[0].Data))*1000)
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
