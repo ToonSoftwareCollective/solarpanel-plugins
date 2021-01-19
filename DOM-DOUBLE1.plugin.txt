@@ -57,7 +57,7 @@
     }
 	
 	
-	function etStep3(secondIDX,urlString,currentPower,today2,totalValue){
+	function getStep3(secondIDX,urlString,currentPower,today,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
 		http.open("GET", "http://" + urlString + ":8080/json.htm?type=devices&rid=" + secondIDX, true)
@@ -69,7 +69,7 @@
 						var JsonObject= JSON.parse(JsonString)
 						var today2
 						currentPower = currentPower + parseInt(JsonObject.result[0].Usage)
-						today2= today2 + ((parseFloat(JsonObject.result[0].CounterToday))*1000)
+						today2= today + ((parseFloat(JsonObject.result[0].CounterToday))*1000)
 						totalValue= totalValue + ((parseFloat(JsonObject.result[0].Data))*1000)
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					}
