@@ -1,7 +1,7 @@
 {"plugins":[		
 			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
-			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["APIKey","URL"]},
-			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["APIKey","URL"]},
+			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["IDX","URL"]},
+			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"]},
 			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"]},
 			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]}
 		]
