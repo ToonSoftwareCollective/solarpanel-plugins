@@ -6,6 +6,7 @@
 			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"]},
 			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"]},
 			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"]},
+			{"friendlyName":"SMA (SB1.5 / SB3.0 etc)", "filename":"SMA1", "data": ["URL", "Password"]},
 			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
 			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"]},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"]}
