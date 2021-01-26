@@ -1,4 +1,4 @@
-/////////             <version>1.0.4</version>
+/////////             <version>1.0.5</version>
 /////////                     SMA1                        /////////////
 /////////  Plugin to extract SMA Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -20,7 +20,7 @@
 					var JsonString = http.responseText
 					var JsonObject= JSON.parse(JsonString)
 					var smaSID = JsonObject.result.sid
-					getSmaStep2(smaSID, tempUrl)
+					getSmaStep2(smaSID, urlString)
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
