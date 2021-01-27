@@ -1,5 +1,5 @@
-/////////             <version>1.0.5</version>
-/////////                     SMA1                        /////////////
+/////////             <version>1.0.1</version>
+/////////                     SMA2                        /////////////
 /////////  Plugin to extract SMA Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
