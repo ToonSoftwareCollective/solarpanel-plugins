@@ -1,6 +1,6 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     SMA2                        /////////////
-/////////  Plugin to extract SMA Solar data for Toon  ///////////////
+/////////  Plugin to extract SMA2 Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
 
@@ -8,12 +8,14 @@
         if (debugOutput) console.log("*********SolarPanel Start Step1")
         var http = new XMLHttpRequest()
 		var url = "https://www.sunnyportal.com/Templates/PublicPage.aspx?page=" + apiKey
+console.log("*********SolarPanel url" + url)
+
 		http.open("GET", url, true);
 		http.onreadystatechange = function() {
 			if (http.readyState === 4) {
 				if (http.status === 200) {
 					var today2
-                    try{
+				   try{	   
 						var resp =  http.responseText
 						var n1 = resp.indexOf("<div class=\"widgetBox\" data-name=\"pvPower\">") + "<div class=\"widgetBox\" data-name=\"pvPower\">".length
 						var n3 = resp.indexOf("class=\"mainValueAmount\"",n1) + "class=\"mainValueAmount\"".length
@@ -41,8 +43,19 @@
 					catch (c){}
 					try{
 						//check on comma
-						var totalArray = total.split(",")
-						totalValue = totalArray[0] + "" +  totalArray[1]
+						if (total.indexOf(",")){
+							var totalArray = total.split(",")
+							totalValue = totalArray[0] + "" +  totalArray[1]
+						}
+						//check on point
+						if (total.indexOf(".")){
+							var totalArray = total.split(".")
+							totalValue = totalArray[0] + "" +  totalArray[1]
+						}
+						//check on comma
+						if (!total.indexOf(",") && !total.indexOf(".")){
+							totalValue = total
+						}
 					}
 					catch (d){}
 					try{
@@ -51,10 +64,12 @@
 						var n33 = resp.indexOf("energyYieldTotalUnit\">",n33) + "energyYieldTotalUnit\">".length
 						var n35 = resp.indexOf("</span>",n33)
 						var totalUnit = resp.substring(n33,n35)
+					
+						if (totalUnit === "MWh") {totalValue = totalValue * 1000}
+
 					}
 					catch (e){}
-						
-					if (totalUnit === "MWh") {totalValue = totalValue * 1000}
+
 					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
