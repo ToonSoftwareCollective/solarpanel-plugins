@@ -1,0 +1,67 @@
+/////////             <version>1.0.5</version>
+/////////                     SMA1                        /////////////
+/////////  Plugin to extract SMA Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start Step1")
+        var http = new XMLHttpRequest()
+		var url = "https://www.sunnyportal.com/Templates/PublicPage.aspx?page=" + apiKey
+		http.open("GET", url, true);
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					var today2
+                    try{
+						var resp =  http.responseText
+						var n1 = resp.indexOf("<div class=\"widgetBox\" data-name=\"pvPower\">") + "<div class=\"widgetBox\" data-name=\"pvPower\">".length
+						var n3 = resp.indexOf("class=\"mainValueAmount\"",n1) + "class=\"mainValueAmount\"".length
+						var n5 = resp.indexOf("data-value=\"",n3) + "data-value=\"".length
+						var n7 = resp.indexOf("\"",n5)
+						currentPower = parseInt(resp.substring(n5,n7))
+					}
+					catch (a){}
+					try{
+						resp =  http.responseText
+						var n11 = resp.indexOf("<div class=\"widgetBox\" data-name=\"pvEnergy\">") + "<div class=\"widgetBox\" data-name=\"pvEnergy\">".length
+						var n13 = resp.indexOf("class=\"mainValueAmount\"",n11) + "class=\"mainValueAmount\"".length
+						var n15 = resp.indexOf("simpleTextFit\">",n13) + "simpleTextFit\">".length
+						var n17 = resp.indexOf("</span>",n15)
+						today2 = parseInt(resp.substring(n15,n17))
+					}
+					catch (b){}
+					try{
+						resp =  http.responseText
+						var n21 = resp.indexOf("<div class=\"widgetBox\" data-name=\"pvEnergy\">") + "<div class=\"widgetBox\" data-name=\"pvEnergy\">".length
+						var n23 = resp.indexOf("energyYieldTotalValue\">",n23) + "energyYieldTotalValue\">".length
+						var n25 = resp.indexOf("</span>",n23)
+						var total = resp.substring(n23,n25)
+					}
+					catch (c){}
+					try{
+						//check on comma
+						var totalArray = total.split(",")
+						totalValue = totalArray[0] + "" +  totalArray[1]
+					}
+					catch (d){}
+					try{
+						resp =  http.responseText
+						var n31 = resp.indexOf("<div class=\"widgetBox\" data-name=\"pvEnergy\">") + "<div class=\"widgetBox\" data-name=\"pvEnergy\">".length
+						var n33 = resp.indexOf("energyYieldTotalUnit\">",n33) + "energyYieldTotalUnit\">".length
+						var n35 = resp.indexOf("</span>",n33)
+						var totalUnit = resp.substring(n33,n35)
+					}
+					catch (e){}
+						
+					if (totalUnit === "MWh") {totalValue = totalValue * 1000}
+					parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	
