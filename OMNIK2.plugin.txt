@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     OMNIK12                       /////////////
 /////////  Plugin to extract Omnik Local Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -6,7 +6,7 @@
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
 		var http = new XMLHttpRequest()
-		var var url = "http://" + urlString + "/js/status.js"
+		var url = "http://" + urlString + "/js/status.js"
 		http.open("GET", url, true);
 		http.onreadystatechange = function() {
 			if (http.readyState === 4) {
