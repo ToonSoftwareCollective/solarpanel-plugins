@@ -16,7 +16,6 @@
 						
 						var today2
 					    var resp = (http.responseText).substring(1,800)
-						console.log(resp)
 
 					    if(resp.indexOf("myDeviceArray[0]=\"")>2){
 						   var s1= resp.indexOf("myDeviceArray[0]=\"") + "myDeviceArray[0]=\"".length
