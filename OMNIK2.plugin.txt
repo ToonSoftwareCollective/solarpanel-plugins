@@ -1,5 +1,5 @@
-/////////             <version>1.0.2</version>
-/////////                     OMNIK12                       /////////////
+/////////             <version>1.0.3</version>
+/////////                     OMNIK2                       /////////////
 /////////  Plugin to extract Omnik Local Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
