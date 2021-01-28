@@ -5,7 +5,7 @@
 			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Username","Password"], "info":"Plugin voor Growatt omvormers via het portal"},
 			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"], "info":"Plugin voor Kostal omvormers. (lokaal)"},
 			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"], "info":"Deze plugin maakt gebruik van het Omnik Portal. Soms gaat het portal de fout in met de dagwaarden."},
-			{"friendlyName":"Omnik lokaal", "filename":"OMNIK2", "data": [L], "info":"Deze Plugin maakt lokaal verbinding met de omvormer. Probeer vooraf of het voor je omvormer werkt: http://xxx.xxx.x.xxx/js/status.js"},
+			{"friendlyName":"Omnik lokaal", "filename":"OMNIK2", "data": ["URL"], "info":"Deze Plugin maakt lokaal verbinding met de omvormer. Probeer vooraf of het voor je omvormer werkt: http://xxx.xxx.x.xxx/js/status.js"},
 			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"], "info":""},
 			{"friendlyName":"SMA (SB1.5 etc)", "filename":"SMA1", "data": ["URL", "Password"], "info":"Deze plugin dient voor de nieuwere SMA modellen zoals de SB1.5, SB2.0 en SB 3.0. De plugin maakt lokaal verbinding met de omvormer."},
 			{"friendlyName":"SMA (tl series)", "filename":"SMA2", "data": ["APIKey"],"info":"Deze plugin dient voor de oudere SMA modellen zoals de SB3000tl-21 en SB3600tl. De plugin maakt verbinding via SunnyPortal.  Login op SunnyPortal -> Scroll naar benedenv(Configuratie) en klik Overzicht van de installatie -> De API-sleutel staat in de url achter page="},
