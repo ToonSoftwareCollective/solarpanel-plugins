@@ -1,0 +1,58 @@
+/////////             <version>1.0.1</version>
+/////////                     OMNIK12                       /////////////
+/////////  Plugin to extract Omnik Local Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
+		var http = new XMLHttpRequest()
+		var var url = "http://" + urlString + "/js/status.js"
+		http.open("GET", url, true);
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					try {
+						if (debugOutput) console.log("*********SolarPanel http.responseText  " + http.responseText)
+						
+						var today2
+					    var resp = (http.responseText).substring(1,800)
+						console.log(resp)
+
+					    if(resp.indexOf("myDeviceArray[0]=\"")>2){
+						   var s1= resp.indexOf("myDeviceArray[0]=\"") + "myDeviceArray[0]=\"".length
+						   var s2= resp.indexOf("\"",s1)
+						   var respString = resp.substring(s1,s2)
+						   if (debugOutput) console.log("*********SolarPanel respString  " + respString)
+						   var respArray = respString.split(",")
+
+						   currentPower = respArray[5]
+						   today2 = parseInt(respArray[6]*10)
+						   totalValue = parseInt(respArray[7])*100
+						}
+
+					    if(resp.indexOf("webData=")>-1){
+						   s1= resp.indexOf("webData=\"") + "webData=\"".length
+						   s2= resp.indexOf("\"",s1)
+						   respString = resp.substring(s1,s2)
+						   if (debugOutput) console.log("*********SolarPanel respString  " + respString)
+						   respArray = respString.split(",")
+
+						   currentPower = respArray[5]
+						   today2 = parseInt(respArray[6]*10)
+						   totalValue = parseInt(respArray[7])*100
+						}
+						
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				}else {
+					if (debugOutput) console.log("*********SolarPanel Plugin error")
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send()
+    }
