@@ -10,6 +10,6 @@
 			{"friendlyName":"SMA (old)", "filename":"SMA2", "data": ["APIKey"],"info":"Deze plugin dient voor de oudere SMA modellen zoals de SB3000tl-21 en SB3600tl. De plugin maakt verbinding via SunnyPortal.  Login op SunnyPortal -> Scroll naar benedenv(Configuratie) en klik Overzicht van de installatie -> De API-sleutel staat in de url achter page="},
 			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"], "info":""},
 			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":""},
-			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":""},
-		]
-	}
+			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":""}
+]
+}
