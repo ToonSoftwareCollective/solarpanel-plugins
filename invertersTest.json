@@ -1,20 +1,6 @@
 {"plugins":[		
-			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
-			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["IDX","URL"]},
-			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"]},
-			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"]},
-			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["IDX","URL"]},
-			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"]},
-			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
-			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"]},
-			{"friendlyName":"Goodwe", "filename":"GOODWE1", "data": ["Username","Password"]},
-			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Username","Password"]},
-			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"]},
-			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"]},
-			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"]},
-			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]},
-			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"]},
-			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"]},
-			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"]}
-		]
-	}
+			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":"Plugin voor Solis omvormers via het portal"},
+			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":"Plugin voor Zeversolar omvormers. (lokaal)"}
+]
+}
+
