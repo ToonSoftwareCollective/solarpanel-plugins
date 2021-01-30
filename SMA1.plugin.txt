@@ -8,7 +8,7 @@
         if (debugOutput) console.log("*********SolarPanel Start getGrowattStep1")
         var http = new XMLHttpRequest()
 		var url = "http://" +  urlString + "/dyn/login.json"
-		var params = "{\"pass\" : \"welkom01\", \"right\" : \"usr\"}"
+		var params = "{\"pass\" : \"" + passWord + "\", \"right\" : \"usr\"}"
 		http.open("POST", url, true);
 		http.setRequestHeader("Accept", "application/json, text/plain, */*")
 		http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
