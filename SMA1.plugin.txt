@@ -52,11 +52,11 @@
 						var s2= jsonstr.indexOf("\"",s1)
 						var identnr = jsonstr.substring(s1,s2)
 
-						if ( typeof(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val) != "undefined") currentPower = parseInt(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val)
+						if ( typeof(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val) != "undefined") {currentPower = parseInt(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val)}else{ currentPower = 0}
+						if ( typeof currentPower == "undefined" || isNaN(currentPower)) {currentPower =0}
 						if ( typeof(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val) != "undefined") today2 = parseInt(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val)
 						if ( typeof(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val) != "undefined") totalValue = parseInt(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val)
-						if ( typeof currentPower == "undefined" || isNaN(currentPower)) {currentPower =0}
-						
+
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
                     } else {
 						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
