@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     DOMOTICZ1                     /////////////
 /////////  Plugin to extract Domoticz Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -21,7 +21,7 @@
 					}
 					catch (e){
 						currentPower = 0
-						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
