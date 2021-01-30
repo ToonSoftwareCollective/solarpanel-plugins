@@ -1,11 +1,11 @@
-/////////             <version>1.0.6</version>
+/////////             <version>1.0.7</version>
 /////////                     SMA1                        /////////////
 /////////  Plugin to extract SMA Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
 
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-        if (debugOutput) console.log("*********SolarPanel Start getGrowattStep1")
+        if (debugOutput) console.log("*********SolarPanel Start getSmaStep1")
         var http = new XMLHttpRequest()
 		var url = "http://" +  urlString + "/dyn/login.json"
 		var params = "{\"pass\" : \"" + passWord + "\", \"right\" : \"usr\"}"
@@ -33,7 +33,7 @@
 	
     function getSmaStep2(smaSID,urlString2){
             var http = new XMLHttpRequest()
-			var url2 = "http://" +  urlString + "/dyn/getValues.json?sid=" + smaSID
+			var url2 = "http://" +  urlString2 + "/dyn/getValues.json?sid=" + smaSID
 			var params = "{\"destDev\":[],\"keys\":[\"6400_00260100\",\"6400_00262200\",\"6100_40263F00\"]}"
 			http.open("POST", url2, true);
             http.setRequestHeader("Accept", "application/json, text/plain, */*")
@@ -51,11 +51,10 @@
 						var s1= jsonstr.indexOf("\"") + 1
 						var s2= jsonstr.indexOf("\"",s1)
 						var identnr = jsonstr.substring(s1,s2)
-						console.log(identnr)
 
-						if ( typeof(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val) != "undefined") currentPower = parseInt(JsonObject["result"]["0156-76BBF2EF"]["6100_40263F00"]["1"][0].val)
-						if ( typeof(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val) != "undefined") today2 = parseInt(JsonObject["result"]["0156-76BBF2EF"]["6400_00262200"]["1"][0].val)
-						if ( typeof(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val) != "undefined") totalValue = parseInt(JsonObject["result"]["0156-76BBF2EF"]["6400_00260100"]["1"][0].val)
+						if ( typeof(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val) != "undefined") currentPower = parseInt(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val)
+						if ( typeof(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val) != "undefined") today2 = parseInt(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val)
+						if ( typeof(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val) != "undefined") totalValue = parseInt(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val)
 						if ( typeof currentPower == "undefined" || isNaN(currentPower)) {currentPower =0}
 						
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
