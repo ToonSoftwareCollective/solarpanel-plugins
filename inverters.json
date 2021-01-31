@@ -1,6 +1,5 @@
 {"plugins":[		
-			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz"},
-			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz (dubbele IDX, Geef bijvoorbeeld 21+43)"},
+			{"friendlyName":"Domoticz", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz. Voor enkele omvormer, geef 1 IDX, voor een dubbele omvormer geef 2 IDX als bijvoorbeeld 12+19"},
 			{"friendlyName":"Enphase 1", "filename":"ENPHASE1", "data": ["URL"], "info":"Plugin voor Enphase omvormers. (lokaal)"},
 			{"friendlyName":"Enphase 2", "filename":"ENPHASE2", "data": ["Username", "APIKey"], "info":"Deze plugin werkt met een API key en user_id. Lees het forum voor het verkrijgen van de sleutels. Vul bij de gebruikersnaam de verkregen site_id in."},
 			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"], "info":"Plugin voor Fronius omvormers. (lokaal)"},
