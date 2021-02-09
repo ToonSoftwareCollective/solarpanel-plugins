@@ -1,0 +1,69 @@
+/////////             <version>1.0.1</version>
+/////////                     SMA3                        /////////////
+/////////  Plugin to extract SMA Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start getSmaStep1")
+        var http = new XMLHttpRequest()
+		var url = "https://" +  urlString + "/dyn/login.json"
+		var params = "{\"pass\" : \"" + passWord + "\", \"right\" : \"usr\"}"
+		http.open("POST", url, true);
+		http.setRequestHeader("Accept", "application/json, text/plain, */*")
+		http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+		http.setRequestHeader("Connection", "Keep-alive");
+		http.setRequestHeader("Content-length", params.length)
+		http.onreadystatechange = function() {
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					var JsonString = http.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var smaSID = JsonObject.result.sid
+					getSmaStep2(smaSID, urlString)
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send(params);
+    }
+	
+	
+    function getSmaStep2(smaSID,urlString2){
+            var http = new XMLHttpRequest()
+			var url2 = "https://" +  urlString2 + "/dyn/getValues.json?sid=" + smaSID
+			var params = "{\"destDev\":[],\"keys\":[\"6400_00260100\",\"6400_00262200\",\"6100_40263F00\"]}"
+			http.open("POST", url2, true);
+            http.setRequestHeader("Accept", "application/json, text/plain, */*")
+            http.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+            http.setRequestHeader("Connection", "Keep-alive");
+			http.setRequestHeader("Content-length", params.length)
+            http.onreadystatechange = function() { // Call a function when the state changes.
+                if (http.readyState === 4) {
+                    if (http.status === 200) {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var today2
+
+						var jsonstr = JSON.stringify(JsonObject["result"])
+						var s1= jsonstr.indexOf("\"") + 1
+						var s2= jsonstr.indexOf("\"",s1)
+						var identnr = jsonstr.substring(s1,s2)
+
+						if ( typeof(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val) != "undefined") {currentPower = parseInt(JsonObject["result"][identnr]["6100_40263F00"]["1"][0].val)}else{ currentPower = 0}
+						if ( typeof currentPower == "undefined" || isNaN(currentPower)) {currentPower =0}
+						if ( typeof(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val) != "undefined") today2 = parseInt(JsonObject["result"][identnr]["6400_00262200"]["1"][0].val)
+						if ( typeof(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val) != "undefined") totalValue = parseInt(JsonObject["result"][identnr]["6400_00260100"]["1"][0].val)
+
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						
+                    } else {
+						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                    }
+                }
+            }
+		http.send(params)
+    }
