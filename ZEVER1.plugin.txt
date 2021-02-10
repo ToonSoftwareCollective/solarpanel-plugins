@@ -20,7 +20,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 							if (zevensolarString[1].length==1){today2 = (parseFloat(zevensolarString[0] + ".0" + zevensolarString[1])).toFixed(2)}
 							if (zevensolarString[1].length==0 || zevensolarString[1].length==2){today2 = parseFloat(zeversolararray[11]).toFixed(2)}
 							today2 = today2*1000
-							totalValue= totalValue + (today2)
+							totalValue= parseFloat( parseFloat(yesterdayTotal) + (today2))
 							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
 						else{
