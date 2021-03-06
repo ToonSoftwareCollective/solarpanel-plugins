@@ -1,0 +1,85 @@
+/////////             <version>1.0.0</version>
+/////////                     APS1                     /////////////
+/////////  Plugin to extract APS data for Toon         ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start  getAPSData")
+        var url = "https://apsystemsema.com:443/ema/loginEMA.action"
+        userName = encodeURI(userName)
+        var http = new XMLHttpRequest()
+        var data = "username=" + userName + "&password=" + passWord
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function() {
+             if (http.readyState === 4) {
+				if (http.status === 200) {
+					getAPSData2()
+				} else {
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send(data)
+	}
+		
+
+    function getAPSData2(){
+	    if (debugOutput) console.log("*********SolarPanel Start  getAPSData2")
+		var http = new XMLHttpRequest()
+        var url = "https://apsystemsema.com/ema/ajax/getDashboardApiAjax/getDashboardProductionInfoAjax"
+        http.open("POST", url, true);
+        http.withCredentials = true;
+        http.onreadystatechange = function() { // Call a function when the state changes.
+             if (http.readyState === 4) {
+                    if (http.status === 200) {
+                        var JsonObject= JSON.parse(http.responseText)
+                        var Ecu = JsonObject.ecuSign
+                        var n101 = Ecu.indexOf("/") + 1
+                        var n102 = Ecu.indexOf("Y", n101)
+                        Ecu = Ecu.substring(n101,n102)
+                        var today2 = Math.floor((JsonObject.today)*1000)
+                        totalValue= Math.floor((JsonObject.lifetime)*1000)
+                        getAPSData3(Ecu,today2,totalValue)
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	
+	function getAPSData3(Ecu,today2,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start  getAPSData3")
+		var datenow = new Date()
+        var today = Qt.formatDateTime(datenow,"yyyyMMdd")
+        var url = "http://api.apsystemsema.com:8073/apsema/v1/ecu/getPowerInfo"
+        var http = new XMLHttpRequest()
+        var data = "ecuId=" + Ecu + "&filter=power&date=" + today
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function() {
+             if (http.readyState === 4) {
+                    if (http.status === 200) {
+                         var newText = http.responseText
+                         newText = newText.replace(/\\/g, "")
+                         newText = newText.replace(/\\/g, "")
+                         newText = newText.replace("]\",\"power\":\"", "],\"power\":")
+                         newText = newText.replace("{\"time\":\"[", "{\"time\":[")
+                         newText = newText.replace("]\"}}", "]}}")
+                         var JsonObject= JSON.parse(newText)
+                         var powerArray = JsonObject.data.power
+                         currentPower =  parseInt(powerArray[powerArray.length-1])
+                         console.log("currentPower: " +  currentPower)
+                         console.log("today2: " +today2)
+                         console.log("totalValue: " +totalValue)
+						 parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		 http.send(data)
+    }
