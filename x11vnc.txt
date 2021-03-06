@@ -1,0 +1,26 @@
+#! /bin/sh
+#
+# x11vnc
+# 
+# script to start up x11vnc on toon.
+#
+# 20160501, marcelr
+#
+
+X11VNC=/usr/bin/x11vnc-bin
+
+# Start the server, with ssl support, VeNCrypt, and standard VNC password 
+# authentication. Accept multiple clients simultaneouly. Run quietly, in the 
+# background:
+
+if [ -x $X11VNC ] ; then
+    $X11VNC -shared                                    \
+	-forever                                       \
+	-rawfb map:/dev/fb0@800x480x32                 \
+	-pipeinput UINPUT:touch,touch_always=1,abs,pressure=128,tslib_cal=/etc/pointercal,direct_abs=/dev/input/event0,direct_btn=/dev/input/event0,direct_rel=/dev/input/event0,direct_key=/dev/input/event0,nouinput \
+	-cursor arrow                                  \
+	-quiet -bg
+else
+    echo "Executable x11vnc-bin not found, did you install it at all?"
+    exit
+fi
