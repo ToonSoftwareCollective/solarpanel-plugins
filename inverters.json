@@ -1,5 +1,5 @@
 {"plugins":[
-			{"friendlyName":"Altenergy Power (APS)", "filename":"APS1", "data": ["Username","Password"], "info":"Plugin voor APSystems (Altenergy Power). Werkt via het webportal dus login voor de webinterface nodig,
+			{"friendlyName":"Altenergy Power (APS)", "filename":"APS1", "data": ["Username","Password"], "info":"Plugin voor APSystems (Altenergy Power). Werkt via het webportal dus login voor de webinterface nodig"},
 			{"friendlyName":"Domoticz", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz. Voor enkele omvormer, geef 1 IDX, voor een dubbele omvormer geef 2 IDX als bijvoorbeeld 12+19"},
 			{"friendlyName":"Enphase 1", "filename":"ENPHASE1", "data": ["URL"], "info":"Plugin voor Enphase omvormers. (lokaal)"},
 			{"friendlyName":"Enphase 2", "filename":"ENPHASE2", "data": ["Username", "APIKey"], "info":"Deze plugin werkt met een API key en user_id. Lees het forum voor het verkrijgen van de sleutels. Vul bij de gebruikersnaam de verkregen site_id in."},
