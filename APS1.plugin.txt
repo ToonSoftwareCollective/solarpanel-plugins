@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     APS1                     /////////////
 /////////  Plugin to extract APS data for Toon         ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -62,19 +62,25 @@
         http.onreadystatechange = function() {
              if (http.readyState === 4) {
                     if (http.status === 200) {
-                         var newText = http.responseText
-                         newText = newText.replace(/\\/g, "")
-                         newText = newText.replace(/\\/g, "")
-                         newText = newText.replace("]\",\"power\":\"", "],\"power\":")
-                         newText = newText.replace("{\"time\":\"[", "{\"time\":[")
-                         newText = newText.replace("]\"}}", "]}}")
-                         var JsonObject= JSON.parse(newText)
-                         var powerArray = JsonObject.data.power
-                         currentPower =  parseInt(powerArray[powerArray.length-1])
-                         console.log("currentPower: " +  currentPower)
-                         console.log("today2: " +today2)
-                         console.log("totalValue: " +totalValue)
-						 parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						try {
+							 var newText = http.responseText
+							 newText = newText.replace(/\\/g, "")
+							 newText = newText.replace(/\\/g, "")
+							 newText = newText.replace("]\",\"power\":\"", "],\"power\":")
+							 newText = newText.replace("{\"time\":\"[", "{\"time\":[")
+							 newText = newText.replace("]\"}}", "]}}")
+							 var JsonObject= JSON.parse(newText)
+							 var powerArray = JsonObject.data.power
+							 currentPower =  parseInt(powerArray[powerArray.length-1])
+							 console.log("currentPower: " +  currentPower)
+							 console.log("today2: " +today2)
+							 console.log("totalValue: " +totalValue)
+							 parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,today2,0,0,0,0, http.status,"error")
+						}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
 					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
