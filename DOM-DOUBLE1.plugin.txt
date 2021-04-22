@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     DOM-DOUBLE1                          /////////////
 /////////  Plugin to extract Domoticz (Double) Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                          ///////////////
@@ -25,7 +25,7 @@
 	function getStep2(number,firstIDX,secondIDX,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + ":8080/json.htm?type=devices&rid=" + firstIDX, true)
+		http.open("GET", "http://" + urlString + "/json.htm?type=devices&rid=" + firstIDX, true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
@@ -59,7 +59,7 @@
 	function getStep3(secondIDX,urlString,currentPower,today,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + ":8080/json.htm?type=devices&rid=" + secondIDX, true)
+		http.open("GET", "http://" + urlString + "/json.htm?type=devices&rid=" + secondIDX, true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
