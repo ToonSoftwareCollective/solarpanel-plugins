@@ -1,0 +1,144 @@
+/////////             <version>1.0.0</version>
+/////////                     GOODWE2                        /////////////
+/////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+            if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
+			var http = new XMLHttpRequest()
+            var url = "https://www.semsportal.com/api/v1/Common/CrossLogin";
+            var vars = "{\"account\":\""+userName+"\",\"pwd\":\""+passWord+"\"}"
+            http.open("POST", url, true);
+            http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+            http.setRequestHeader('Token','{"version":"v2.1.0","client":"ios","language":"en"}');
+            http.setRequestHeader('Connection', 'keep-alive');
+            http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
+            http.setRequestHeader('Host', 'www.semsportal.com');
+            http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+            http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
+            http.onreadystatechange = function() { // Call a function when the state changes.
+				if (http.readyState === 4) {
+					if (http.status === 200) {
+						try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							var uid = JsonObject.data.uid
+							var token = JsonObject.data.token
+							var timestamp = JsonObject.data.timestamp
+							if (debugOutput) console.log("*********SolarPanel uid : " + uid)
+							if (debugOutput) console.log("*********SolarPanel token : " + token)
+							getStep2(uid,token, timestamp,siteid)
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
+					} else {
+						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					}
+				}
+			}
+            http.send(vars);
+    }
+	
+	
+	function getStep2(uid,token, timestamp,siteid){
+        console.log("Start getStep2")
+        var http = new XMLHttpRequest()
+        var url = "https://www.semsportal.com/api/v2/HistoryData/QueryPowerStationByHistory";
+        var vars="{\"page_size\":\"40\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"\",\"powerstation_type\":\"\"}"
+        http.open("POST", url, true);
+        http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+        http.setRequestHeader('Connection', 'keep-alive');
+        http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
+        http.setRequestHeader('Host', 'www.semsportal.com');
+        http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+        http.setRequestHeader('Token', '{"version":"v2.1.0","client":"ios","language":"en","timestamp":"' + timestamp + '","uid":"' + uid + '","token":"' + token + '"}');
+        http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
+        http.onreadystatechange = function() { // Call a function when the state changes.
+			if (http.readyState === 4) {
+				if (http.status === 200) {
+					try {
+						console.log(http.responseText)
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var hasError = JsonObject.hasError
+						var succes = JsonObject.msg
+						console.log (JsonObject.hasError)
+						if(!hasError){
+							var inverterID
+							for (var V in JsonObject.data.list ){
+								if (JsonObject.data.list[V].pw_name == siteid){
+								  inverterID = JsonObject.data.list[V].id
+								  if (debugOutput) console.log("found")
+								  if (debugOutput) console.log(inverterID)
+								}
+							}
+							getStep3(uid,token,timestamp,inverterID);
+						}
+						} else {
+							if (debugOutput) console.log("*********SolarPanel Plugin error")
+							parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+						}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+				   if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+				   parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+        http.send(vars);
+    }
+
+
+    function getStep3(uid,token, timestamp){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep3")
+		var http = new XMLHttpRequest()
+        var url = "https://www.semsportal.com/api/PowerStationMonitor/QueryPowerStationMonitorForApp";
+        var vars="{\"page_size\":\"5\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"\",\"powerstation_type\":\"\"}"
+        http.open("POST", url, true);
+        http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+        http.setRequestHeader('Connection', 'keep-alive');
+        http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
+        http.setRequestHeader('Host', 'www.semsportal.com');
+        http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+        http.setRequestHeader('Token', '{"version":"v2.1.0","client":"ios","language":"en","timestamp":"' + timestamp + '","uid":"' + uid + '","token":"' + token + '"}');
+        http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
+        http.onreadystatechange = function() { // Call a function when the state changes.
+				if (http.readyState === 4) {
+					if (http.status === 200) {
+						try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							var hasError = JsonObject.hasError
+							var succes = JsonObject.msg
+							var today2
+							if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
+							if(!hasError){
+								currentPower = parseInt(JsonObject.data[0].pac)
+								today2 = Math.floor((JsonObject.data[0].eday)*1000)
+								totalValue = Math.floor((JsonObject.data[0].etotal)*1000)							
+								if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
+								if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
+								parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+							} else {
+								if (debugOutput) console.log("*********SolarPanel Plugin error")
+								parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+							}
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
+					} else {
+						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					}
+				}
+		}
+		http.send(vars);
+    }
