@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     GOODWE2                        /////////////
 /////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -60,12 +60,12 @@
 			if (http.readyState === 4) {
 				if (http.status === 200) {
 					try {
-						console.log(http.responseText)
+						if (debugOutput) console.log(http.responseText)
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
 						var hasError = JsonObject.hasError
 						var succes = JsonObject.msg
-						console.log (JsonObject.hasError)
+						if (debugOutput) console.log (JsonObject.hasError)
 						if(!hasError){
 							var inverterID
 							for (var V in JsonObject.data.list ){
@@ -76,12 +76,11 @@
 								}
 							}
 							getStep3(uid,token,timestamp,inverterID);
-						}
 						} else {
 							if (debugOutput) console.log("*********SolarPanel Plugin error")
 							parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 						}
-					catch (e){
+					}catch (e){
 						currentPower = 0
 						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 					}
@@ -95,12 +94,12 @@
     }
 
 
-    function getStep3(uid,token, timestamp){
+    function getStep3(uid,token, timestamp, inverterID){
         if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep3")
 		var http = new XMLHttpRequest()
         var url = "https://www.semsportal.com/api/PowerStationMonitor/QueryPowerStationMonitorForApp";
-        var vars="{\"page_size\":\"5\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"\",\"powerstation_type\":\"\"}"
-        http.open("POST", url, true);
+        var vars="{\"page_size\":\"5\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"" + inverterID + "\",\"powerstation_type\":\"\"}"
+		http.open("POST", url, true);
         http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
         http.setRequestHeader('Connection', 'keep-alive');
         http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
@@ -113,6 +112,7 @@
 					if (http.status === 200) {
 						try {
 							var JsonString = http.responseText
+							if (debugOutput) console.log(http.responseText)
 							var JsonObject= JSON.parse(JsonString)
 							var hasError = JsonObject.hasError
 							var succes = JsonObject.msg
