@@ -1,0 +1,39 @@
+/////////             <version>1.0.0</version>
+/////////                     SOLAX1                       /////////////
+/////////  Plugin to extract Solax Solar data for Toon     ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolaxData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "https://www.solaxcloud.com:9443/proxy/api/getRealtimeInfo.do?tokenId=" + apiKey + "&sn=" + siteid, true)
+        
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+					if (http.status === 200 || http.status === 300  || http.status === 302) {
+						try {
+							var JsonString = http.responseText
+							var JsonObject= JSON.parse(JsonString)
+							var today2
+							if (JsonObject.success){
+								currentPower = parseInt(JsonObject.result.acpower)	
+								today2 = Math.floor(JsonObject.result.yieldtoday  * 1000)
+								totalValue= Math.floor(JsonObject.result.yieldtotal  * 1000)
+								parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+							}else{
+								currentPower = 0
+								parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+							}
+						}
+						catch (e){
+							currentPower = 0
+							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						}
+					} else {
+						parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+					}
+			}
+		}
+		http.send();
+    }
+	

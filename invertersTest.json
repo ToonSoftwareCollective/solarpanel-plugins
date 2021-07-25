@@ -1,6 +1,8 @@
 {"plugins":[		
-			{"friendlyName":"Enphase", "filename":"ENPHASE1", "data": ["URL"]},
-			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Password", "Username"]},
-			{"friendlyName":"SMA", "filename":"SMA1", "data": ["Password","URL"]}
-		]
-	}
+			{"friendlyName":"Domoticz", "filename":"DOMOTICZ1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz"},
+			{"friendlyName":"Domoticz (Double)", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz (dubbele IDX, Geef bijvoorbeeld 21+43)"},
+			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":"Plugin voor Solis omvormers via het portal"},
+			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":"Plugin voor Zeversolar omvormers. (lokaal)"}
+]
+}
+
