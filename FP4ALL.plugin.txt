@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     FP4ALL                        /////////////
 /////////  Plugin to extract FP4ALL Solar data for Toon    ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -22,7 +22,7 @@
 						today2 = response.substring(n205, n206);
 						
 						var n208 = response.indexOf("<energy_total>") + "<energy_total>".length
-						var n209 = response.indexOf("<", n205)
+						var n209 = response.indexOf("<", n208)
 						totalValue = response.substring(n208, n209);
 
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
