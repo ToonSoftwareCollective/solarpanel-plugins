@@ -1,0 +1,41 @@
+/////////             <version>1.0.0</version>
+/////////                     SAJ1                        /////////////
+/////////  Plugin to extract SAJ Solar data for Toon    ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSAJData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + "/real_time_data.xml", true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var response = http.responseText
+						var n201 = response.indexOf("<pac1>") + "<pac1>".length
+						var n202 = response.indexOf("<", n201)
+						currentPower = response.substring(n201, n202);
+						
+						var today2
+						var n205 = response.indexOf("<e-today>") + "<e-today>".length
+						var n206 = response.indexOf("<", n205)
+						today2 = parseInt(parseFloat(response.substring(n205, n206))*1000);
+						
+						var n208 = response.indexOf("<e-total>") + "<e-total>".length
+						var n209 = response.indexOf("<", n205)
+						totalValue = parseInt(parseFloat(response.substring(n208, n209))*1000);
+
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+	http.send();
+	}
