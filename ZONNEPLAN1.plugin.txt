@@ -4,6 +4,7 @@
 /////////                   By Oepi-Loepi                  ///////////////
 
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		var http = new XMLHttpRequest()
 		var url = "https://app-api.zonneplan.nl/user-accounts/me"
@@ -52,7 +53,7 @@
 				if (http.status === 200) {
 					try {
 
-						console.log("*********SolarPanel http.responseText " + http.responseText)
+						if (debugOutput)  console.log("*********SolarPanel http.responseText " + http.responseText)
 
                         var JsonString = http.responseText
                         var JsonObject= JSON.parse(JsonString)
@@ -83,6 +84,10 @@
 		http.send();
     }
 	
+	
+	
+	
+
 	
 	
 	
