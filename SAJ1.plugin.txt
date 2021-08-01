@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     SAJ1                        /////////////
 /////////  Plugin to extract SAJ Solar data for Toon    ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -22,7 +22,7 @@
 						today2 = parseInt(parseFloat(response.substring(n205, n206))*1000);
 						
 						var n208 = response.indexOf("<e-total>") + "<e-total>".length
-						var n209 = response.indexOf("<", n205)
+						var n209 = response.indexOf("<", n208)
 						totalValue = parseInt(parseFloat(response.substring(n208, n209))*1000);
 
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
