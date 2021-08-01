@@ -20,7 +20,7 @@
 			{"friendlyName":"Solax", "filename":"SOLAX1", "data": ["SiteID", "APIKey"], "info":"Plugin voor Solax omvormers via het portal. De API key en de siteID wordt verkregen via het portal. Het siteID is het serienummer van de LAN module."},
 			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":"Plugin voor Solis omvormers via het portal"},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":"Plugin voor Zeversolar omvormers. (lokaal)"},
-			{"friendlyName":"Zonneplan", "filename":"ZONNEPLAN1", "data": ["Username"], "info":"Geef een emailadres en klik op knop \"mail versturen\". Ga daarna naar je mail box en klik op mail bevestigen in de mail. Klik pas daarna op "\"mail bevestigd\"."}
+			{"friendlyName":"Zonneplan", "filename":"ZONNEPLAN1", "data": ["Username"], "info":"Geef een emailadres en klik op knop \"mail versturen\". Ga daarna naar je mail box en klik op mail bevestigen in de mail. Klik pas daarna op \"mail bevestigd\"."}
 ]
 }
 
