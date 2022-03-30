@@ -1,4 +1,4 @@
-/////////             <version>1.0.2</version>
+/////////             <version>1.0.3</version>
 /////////                     ENPHASE2                     /////////////
 /////////  Plugin to extract Enphase Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -6,7 +6,7 @@
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getEnphaseData")
 		var http = new XMLHttpRequest();
-		var url = "https://api.enphaseenergy.com/api/v2/systems/1590917/summary?key=" + apiKey + "&user_id=" + userName
+		var url = "https://api.enphaseenergy.com/api/v2/systems/" + siteid+ "/summary?key=" + apiKey + "&user_id=" + userName
 		http.open("GET", url, true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
