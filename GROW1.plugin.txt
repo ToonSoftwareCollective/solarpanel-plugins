@@ -1,4 +1,4 @@
-/////////             <version>1.0.12</version>
+/////////             <version>1.0.13</version>
 /////////                     GROW1                        /////////////
 /////////  Plugin to extract Growatt Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -31,9 +31,7 @@
 					var JsonString = http.responseText
 					if (debugOutput) console.log("*********SolarPanel JsonString " +  JsonString)
 					var JsonObject= JSON.parse(JsonString)
-					var plantID = parseInt(JsonObject.back.data[0].plantId)
-					if (debugOutput) console.log("plantID " + plantID)
-					getGrowattStep2(plantID);
+					getGrowattStep2();
 				} else {
 					if (debugOutput) console.log("*********SolarPanel  getGrowattStep2 http.status " +  http.status)
 					currentPower = 0
@@ -46,13 +44,13 @@
 	
 
 
-	function getGrowattStep2(plantID){
+	function getGrowattStep2(){
 		if (debugOutput) console.log("*********SolarPanel Start getGrowattStep3")
 		var http = new XMLHttpRequest()
-		var params = "language=5&plantId=" + plantID
-		var url2 = "https://server-api.growatt.com/newTwoPlantAPI.do?op=getUserCenterEnertyDataByPlantid"
-		console.log("*********SolarPanel  url2" +  url2)
-		http.open("POST", url2, true)
+		var params = "language=5"
+		var url2 = "https://server-api.growatt.com/newPlantAPI.do?action=getUserCenterEnertyDataTwo"
+		console.log("*********SolarPanel  url2 " +  url2)
+		http.open("GET", url2, true)
 		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded")
 		http.setRequestHeader("Content-length", params.length)
 		http.setRequestHeader("Connection", "keep-alive")
@@ -70,11 +68,12 @@
 						if (debugOutput) console.log("today2: " + today2)
 						totalValue= Math.floor((JsonObject.totalValue)*1000)
 						if (debugOutput) console.log("totalValue: " + totalValue)
+						 //getGrowattStep3()
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					}
 					catch (e){
 						currentPower = 0
-						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel  getGrowattStep3 http.status " +  http.status)
@@ -82,5 +81,5 @@
 				}
 			}
 		}
-        http.send(params);
+		http.send(params);
 	}
