@@ -1,4 +1,4 @@
-/////////             <version>1.0.5</version>
+/////////             <version>1.0.6</version>
 /////////                     ZEVER1                         /////////////
 /////////  Plugin to extract ZeverSolar Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                    ///////////////
@@ -24,7 +24,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 						}
 						else{
-							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
+							parseReturnData(0,totalValue,todayValue,0,0,0,0,http.status,"succes")
 						}
 					}
 					catch (e){
@@ -32,7 +32,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 					}
 				} else {
-					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 				}
 			}
 		}
