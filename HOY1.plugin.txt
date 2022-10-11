@@ -84,7 +84,7 @@ function getStep2(token,siteid2){
 		}
 	}
 	xhr.send();
-    }
+   
 }
 
 function getStep3(token,siteid2){
