@@ -53,7 +53,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 
 function getStep2(sha256, passWord2, userName2){
 	if (debugOutput) console.log("*********SolarPanel Start getStep2")
-		userName2 = userName2.replace('@', '83@')
+		//userName2 = userName2.replace('@', '83@')
 		if (debugOutput) console.log("*********SolarPanel encodeURIComponent(userName2): " + encodeURIComponent(userName2))
 		var data = "grant_type=password&username=" + encodeURIComponent(userName2) + "&clear_text_pwd=" + encodeURIComponent(passWord2) + "&password=" + encodeURIComponent(sha256) + "&identity_type=2&client_id=test"
 		
