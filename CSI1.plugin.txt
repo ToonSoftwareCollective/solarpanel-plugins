@@ -135,6 +135,7 @@ function getStep3(token){
 				   var JsonObject= JSON.parse(JsonString)
 				   var today2
 				   currentPower = parseInt(JsonObject.data[0].generationPower)
+				   if(currentPower<20)currentPower = 0
 				   today2 = parseInt(JsonObject.data[0].generationValue)
 				   totalValue =  parseInt(JsonObject.data[0].generationTotal)
 				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
