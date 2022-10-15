@@ -189,11 +189,12 @@ function getStep3(token){
 				   var today2
 				   currentPower = parseInt(JsonObject.data[0].generationPower)
 				   if(currentPower<20)currentPower = 0
+				   totalValue =  parseInt(parseFloat(JsonObject.data[0].generationTotal)*1000)
+				  
 				   //today2 = parseInt(JsonObject.data[0].generationValue)
 				   //today2 = parseInt(parseFloat(JsonObject.data[0].generationCapacity)*1000)
+				   
 				   today2 = totalValue - yesterdayTotal
-				   if (debugOutput) console.log("*********SolarPanel today2 : " + today2)
-				   totalValue =  parseInt(JsonObject.data[0].generationTotal)
 				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 				}
 				catch (e){
