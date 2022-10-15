@@ -190,7 +190,8 @@ function getStep3(token){
 				   currentPower = parseInt(JsonObject.data[0].generationPower)
 				   if(currentPower<20)currentPower = 0
 				   //today2 = parseInt(JsonObject.data[0].generationValue)
-				   today2 = totalValue - yesterdayTotal
+				   //today2 = totalValue - yesterdayTotal
+				   today2 = parseInt(JsonObject.data[0].generationCapacity)
 				   totalValue =  parseInt(JsonObject.data[0].generationTotal)
 				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 				}
