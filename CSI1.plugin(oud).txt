@@ -1,114 +1,61 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.0</version>
 /////////                     CSI1                    /////////////
 /////////  Plugin to extract Canadian Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
 
-function rightRotate(value, amount) {
-	return (value>>>amount) | (value<<(32 - amount));
-}
-	
-function sha256(ascii) {
-   
-    var mathPow = Math.pow;
-    var maxWord = mathPow(2, 32);
-    var lengthProperty = 'length'
-    var i, j; // Used as a counter across the whole file
-    var result = ''
-
-    var words = [];
-    var asciiBitLength = ascii[lengthProperty]*8;
-    
-    //* caching results is optional - remove/add slash from front of this line to toggle
-    // Initial hash value: first 32 bits of the fractional parts of the square roots of the first 8 primes
-    // (we actually calculate the first 64, but extra values are just ignored)
-    var hash = sha256.h = sha256.h || [];
-    // Round constants: first 32 bits of the fractional parts of the cube roots of the first 64 primes
-    var k = sha256.k = sha256.k || [];
-    var primeCounter = k[lengthProperty];
-    /*/
-    var hash = [], k = [];
-    var primeCounter = 0;
-    //*/
-
-    var isComposite = {};
-    for (var candidate = 2; primeCounter < 64; candidate++) {
-        if (!isComposite[candidate]) {
-            for (i = 0; i < 313; i += candidate) {
-                isComposite[i] = candidate;
-            }
-            hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;
-            k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;
-        }
-    }
-    
-    ascii += '\x80' // Append Æ‡' bit (plus zero padding)
-    while (ascii[lengthProperty]%64 - 56) ascii += '\x00' // More zero padding
-    for (i = 0; i < ascii[lengthProperty]; i++) {
-        j = ascii.charCodeAt(i);
-        if (j>>8) return; // ASCII check: only accept characters in range 0-255
-        words[i>>2] |= j << ((3 - i)%4)*8;
-    }
-    words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);
-    words[words[lengthProperty]] = (asciiBitLength)
-    
-    // process each chunk
-    for (j = 0; j < words[lengthProperty];) {
-        var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
-        var oldHash = hash;
-        // This is now the undefinedworking hash", often labelled as variables a...g
-        // (we have to truncate as well, otherwise extra entries at the end accumulate
-        hash = hash.slice(0, 8);
-        
-        for (i = 0; i < 64; i++) {
-            var i2 = i + j;
-            // Expand the message into 64 words
-            // Used below if 
-            var w15 = w[i - 15], w2 = w[i - 2];
-
-            // Iterate
-            var a = hash[0], e = hash[4];
-            var temp1 = hash[7]
-                + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) // S1
-                + ((e&hash[5])^((~e)&hash[6])) // ch
-                + k[i]
-                // Expand the message schedule if needed
-                + (w[i] = (i < 16) ? w[i] : (
-                        w[i - 16]
-                        + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3)) // s0
-                        + w[i - 7]
-                        + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10)) // s1
-                    )|0
-                );
-            // This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
-            var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
-                + ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2])); // maj
-            
-            hash = [(temp1 + temp2)|0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
-            hash[4] = (hash[4] + temp1)|0;
-        }
-        
-        for (i = 0; i < 8; i++) {
-            hash[i] = (hash[i] + oldHash[i])|0;
-        }
-    }
-    
-    for (i = 0; i < 8; i++) {
-        for (j = 3; j + 1; j--) {
-            var b = (hash[i]>>(j*8))&255;
-            result += ((b < 16) ? 0 : '') + b.toString(16);
-        }
-    }
-    return result;
-}
-
-
 function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-		var newHash = sha256(passWord);
-		if (debugOutput) console.log("*********SolarPanel new function sha256: " + newHash)
+	if (debugOutput) console.log("*********SolarPanel Start getSolarData")
+	var data = "value=" + passWord;
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", "https://tools.keycdn.com/sha256-online-generator");
+	xhr.setRequestHeader("Host", "tools.keycdn.com");
+	xhr.setRequestHeader("Connection", "keep-alive");
+	xhr.setRequestHeader("Cache-Control", "max-age=0");
+	xhr.setRequestHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
+	xhr.setRequestHeader("sec-ch-ua-mobile", "?0");
+	xhr.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
+	xhr.setRequestHeader("Upgrade-Insecure-Requests", "1");
+	xhr.setRequestHeader("Origin", "https://tools.keycdn.com");
+	xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
+	xhr.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+	xhr.setRequestHeader("Sec-Fetch-Site", "same-origin");
+	xhr.setRequestHeader("Sec-Fetch-Mode", "navigate");
+	xhr.setRequestHeader("Sec-Fetch-User", "?1");
+	xhr.setRequestHeader("Sec-Fetch-Dest", "document");
+	xhr.setRequestHeader("Referer", "https://tools.keycdn.com/sha256-online-generator");
+	xhr.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+	xhr.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
+	
+	xhr.onreadystatechange = function() { // Call a function when the state changes.
+		if (xhr.readyState == XMLHttpRequest.DONE) {
+			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
+				try {
+					if (debugOutput) console.log(xhr.responseText)
+					var begin = xhr.responseText.indexOf("<code class=\"language-none\">") + "<code class=\"language-none\">".length
+					var end = xhr.responseText.indexOf("<",begin)
+					var sha256 = xhr.responseText.substring(begin, end).trim()
+					if (debugOutput) console.log("sha2 encrypted: " +sha256)
+					getStep2(sha256, passWord, userName)
+				} catch (e){
+					currentPower = 0
+					parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
+				}
+			} else {
+				parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
+			}
+		}
+	}
+	xhr.send(data);
+}
+
+function getStep2(sha256, passWord2, userName2){
+	if (debugOutput) console.log("*********SolarPanel Start getStep2")
+		//userName2 = userName2.replace('@', '83@')
 		if (debugOutput) console.log("*********SolarPanel encodeURIComponent(userName2): " + encodeURIComponent(userName2))
-		var data = "grant_type=password&username=" + encodeURIComponent(userName) + "&clear_text_pwd=" + encodeURIComponent(passWord) + "&password=" + encodeURIComponent(newHash) + "&identity_type=2&client_id=test"
+		var data = "grant_type=password&username=" + encodeURIComponent(userName2) + "&clear_text_pwd=" + encodeURIComponent(passWord2) + "&password=" + encodeURIComponent(sha256) + "&identity_type=2&client_id=test"
 		
 		if (debugOutput) console.log(data)
 		var xhr = new XMLHttpRequest();
@@ -189,8 +136,7 @@ function getStep3(token){
 				   var today2
 				   currentPower = parseInt(JsonObject.data[0].generationPower)
 				   if(currentPower<20)currentPower = 0
-				   //today2 = parseInt(JsonObject.data[0].generationValue)
-				   today2 = totalValue - yesterdayTotal
+				   today2 = parseInt(JsonObject.data[0].generationValue)
 				   totalValue =  parseInt(JsonObject.data[0].generationTotal)
 				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 				}
