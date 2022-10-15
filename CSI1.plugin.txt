@@ -183,7 +183,7 @@ function getStep3(token){
 		if (xhr.readyState == XMLHttpRequest.DONE) {
 			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
 				try {
-				   console.log(xhr.responseText)
+				   if (debugOutput) console.log(xhr.responseText)
 				   var JsonString = xhr.responseText
 				   var JsonObject= JSON.parse(JsonString)
 				   var today2
@@ -191,7 +191,7 @@ function getStep3(token){
 				   if(currentPower<20)currentPower = 0
 				   //today2 = parseInt(JsonObject.data[0].generationValue)
 				   //today2 = totalValue - yesterdayTotal
-				   today2 = parseInt(JsonObject.data[0].generationCapacity)*1000
+				   today2 = parseInt(parseFloat(JsonObject.data[0].generationCapacity)*1000)
 				   totalValue =  parseInt(JsonObject.data[0].generationTotal)
 				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 				}
