@@ -1,3 +1,48 @@
+/////////             <version>1.0.7</version>
+/////////                     ZEVER1                         /////////////
+/////////  Plugin to extract ZeverSolar Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                    ///////////////
+
+function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getZeversolarData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString +  "/home.cgi", true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var responseText = http.responseText
+						var zeversolararray = responseText.split("\n")
+						if (zeversolararray[12]=="OK"){
+							currentPower = parseInt(parseFloat(zeversolararray[10]))
+							var today2
+							var zevensolarString = zeversolararray[11].split(".")
+							if (zevensolarString[1].length==1){today2 = (parseFloat(zevensolarString[0] + ".0" + zevensolarString[1])).toFixed(2)}
+							if (zevensolarString[1].length==0 || zevensolarString[1].length==2){today2 = parseFloat(zeversolararray[11]).toFixed(2)}
+							today2 = today2*1000
+							totalValue= parseFloat( parseFloat(yesterdayTotal) + (today2))
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						}
+						else{
+							parseReturnData(0,totalValue,0,0,0,0,0,http.status,"succes")
+						}
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    }
+	
+
+
+
+/*
 /////////             <version>1.0.6</version>
 /////////                     ZEVER1                         /////////////
 /////////  Plugin to extract ZeverSolar Solar data for Toon  ///////////////
@@ -39,4 +84,4 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		http.send();
     }
 	
-
+*/
