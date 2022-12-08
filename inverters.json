@@ -19,6 +19,7 @@
 			{"friendlyName":"SMA (SB1.5 etc, HTTPS)", "filename":"SMA3", "data": ["URL", "Password"], "info":"Deze plugin dient voor de nieuwere SMA modellen zoals de SB1.5, SB2.0 en SB 3.0. De plugin maakt lokaal verbinding met de omvormer. HTTPS versie"},
 			{"friendlyName":"SMA (tl series)", "filename":"SMA2", "data": ["APIKey"],"info":"Deze plugin dient voor de oudere SMA modellen zoals de SB3000tl-21 en SB3600tl. De plugin maakt verbinding via SunnyPortal.  Login op SunnyPortal -> Scroll naar benedenv(Configuratie) en klik Overzicht van de installatie -> De API-sleutel staat in de url achter page="},
 			{"friendlyName":"Solaredge", "filename":"SOLEDGE1", "data": ["SiteID", "APIKey"], "info":"Plugin voor SolarEdge omvormers via het portal"},
+			{"friendlyName":"Solarman", "filename":"SOLMAN1", "data": ["Username","Password"], "info":"Plugin voor Solarman. Geef de naam en wachtwoord van de https://home.solarmanpv.com/ site"},
 			{"friendlyName":"Solax", "filename":"SOLAX1", "data": ["SiteID", "APIKey"], "info":"Plugin voor Solax omvormers via het portal. De API key en de siteID wordt verkregen via het portal. Het siteID is het serienummer van de LAN module."},
 			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":"Plugin voor Solis omvormers via het portal"},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":"Plugin voor Zeversolar omvormers. (lokaal)"},
