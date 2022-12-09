@@ -1,33 +1,31 @@
 /////////             <version>1.0.0</version>
-/////////                     HOMEASSISTANT1                     ///////////////
+/////////                HOMEASSISTANT1                          ///////////////
 /////////  Plugin to extract Home Assistant Solar data for Toon  ///////////////
 /////////                   By Bonno                             ///////////////
-
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-		if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
-		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + "/api/states/sensor.solar_panels", true)
-		http.setRequestHeader("Authorization: Bearer " + apiKey)
-		http.onreadystatechange = function() {
-			if (http.readyState == XMLHttpRequest.DONE) {
-				if (http.status === 200 || http.status === 300  || http.status === 302) {
-					try {
-						var JsonString = http.responseText
-						var JsonObject= JSON.parse(JsonString)
-						var currentPower = parseInt(JsonObject.attributes.current)
-                        var today2=parseInt(JsonObject.attributes.today)
-                        var totalValue= parseFloat(JsonObject.attributes.total)
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
-					}
-					catch (e){
-						currentPower = 0
-						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
-					}
-				} else {
-					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
-				}
-			}
-		}
-		http.send();
+function getSolarData(passWord, userName, apiKey, siteid, urlString, totalValue) {
+    if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
+    var http = new XMLHttpRequest();
+    http.open("GET", "http://" + urlString + "/api/states/sensor.solar_panel", true)
+    http.setRequestHeader("Authorization: Bearer " + apiKey)
+    http.onreadystatechange = function() {
+        if (http.readyState == XMLHttpRequest.DONE) {
+            if (http.status === 200 || http.status === 300 || http.status === 302) {
+                try {
+                    var JsonString = http.responseText
+                    var JsonObject = JSON.parse(JsonString)
+                    var currentPower = parseInt(JsonObject.attributes.current)
+                    var today2 = parseInt(JsonObject.attributes.today)
+                    var totalValue = parseFloat(JsonObject.attributes.total)
+                    parseReturnData(currentPower, totalValue, today2, 0, 0, 0, 0, http.status, "succes")
+                } catch (e) {
+                    currentPower = 0
+                    parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error")
+                }
+            } else {
+                if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+                parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error")
+            }
+        }
     }
+    http.send();
+}
