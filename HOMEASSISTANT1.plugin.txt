@@ -4,9 +4,12 @@
 /////////                   By Bonno                             ///////////////
 function getSolarData(passWord, userName, apiKey, siteid, urlString, totalValue) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
+    var url = "http://" + urlString + "/api/states/sensor.solar_panel"
     var http = new XMLHttpRequest();
-    http.open("GET", "http://" + urlString + "/api/states/sensor.solar_panel", true)
-    http.setRequestHeader("Authorization: Bearer " + apiKey)
+    if (debugOutput) console.log("*********SolarPanel HA url " + url) 
+    if (debugOutput) console.log("*********SolarPanel HA token " + apiKey)
+    http.open("GET", url, true)
+    http.setRequestHeader("Authorization", "Bearer " + apiKey);
     http.onreadystatechange = function() {
         if (http.readyState == XMLHttpRequest.DONE) {
             if (http.status === 200 || http.status === 300 || http.status === 302) {
