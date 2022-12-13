@@ -1,32 +1,30 @@
-/////////             <version>1.0.0</version>
-/////////                HOMEASSISTANT1                          ///////////////
-/////////  Plugin to extract Home Assistant Solar data for Toon  ///////////////
-/////////                   By Bonno                             ///////////////
-function getSolarData(passWord, userName, apiKey, siteid, urlString, totalValue) {
+/////////                <version>1.0.1</version>                /////////
+/////////                     HOMEASSISTANT1                     /////////
+/////////  Plugin to extract Home Assistant Solar data for Toon  /////////
+/////////                        By Bonno                        /////////
+function getSolarData(password, username, apiKey, siteId, urlString, totalPower) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
     var url = "http://" + urlString + "/api/states/sensor.solar_panel"
     var http = new XMLHttpRequest();
     if (debugOutput) console.log("*********SolarPanel HA url " + url) 
-    if (debugOutput) console.log("*********SolarPanel HA token " + apiKey)
     http.open("GET", url, true)
     http.setRequestHeader("Authorization", "Bearer " + apiKey);
     http.onreadystatechange = function() {
         if (http.readyState == XMLHttpRequest.DONE) {
             if (http.status === 200 || http.status === 300 || http.status === 302) {
                 try {
-                    var JsonString = http.responseText
-                    var JsonObject = JSON.parse(JsonString)
-                    var currentPower = parseInt(JsonObject.attributes.current)
-                    var today2 = parseInt(JsonObject.attributes.today)
-                    var totalValue = parseFloat(JsonObject.attributes.total)
-                    parseReturnData(currentPower, totalValue, today2, 0, 0, 0, 0, http.status, "succes")
+                    var sensorResult = http.responseText
+                    var sensorObject = JSON.parse(sensorResult)
+                    var currentPower = parseInt(sensorObject.attributes.current)
+                    var todayPower = parseInt(sensorObject.attributes.today)
+                    var totalPower = parseFloat(sensorObject.attributes.total)
+                    parseReturnData(currentPower, totalPower, todayPower, 0, 0, 0, 0, http.status, "succes")
                 } catch (e) {
-                    currentPower = 0
-                    parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error")
+                    parseReturnData(0, totalPower, 0, 0, 0, 0, 0, http.status, "error")
                 }
             } else {
                 if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-                parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error")
+                parseReturnData(0, totalPower, 0, 0, 0, 0, 0, http.status, "error")
             }
         }
     }
