@@ -89,7 +89,9 @@ function getStep3(plantUID){
 	var m = reqDate.getMonth()+1
 	var y = reqDate.getFullYear()
 	if (debugOutput) console.log("*********SolarPanel getStep3 date: " + y + "-" + m + "-" + d)	
+		
 	var url ="https://fop.saj-electric.com/saj/monitor/site/getPlantDetailInfo?plantuid=" + plantUID + "&clientDate=" + y + "-" + m + "-" + d
+	if (debugOutput) console.log("*********SolarPanel getStep3 url: " + url)	
 
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", url, true);
@@ -99,12 +101,14 @@ function getStep3(plantUID){
 			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
 				try {
 					if (debugOutput) console.log(xhr.responseText)
-						var JsonString = xhr.responseText
-						var JsonObject= JSON.parse(JsonString)
-						currentPower = JsonObject.plantDetail.nowPower
-						var today2 = Math.floor(JsonObject.plantDetail.todayElectricity  * 1000)
-						totalValue = Math.floor(JsonObject.plantDetail.totalElectricity  * 1000)
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
+					var JsonString = xhr.responseText
+					var JsonObject= JSON.parse(JsonString)
+					currentPower = JsonObject.plantDetail.nowPower
+					totalValue = Math.floor(JsonObject.plantDetail.totalElectricity  * 1000)
+					if (debugOutput) console.log("*********SolarPanel getStep3 currentPower: " + currentPower)	
+					if (debugOutput) console.log("*********SolarPanel getStep3 totalValue: " + totalValue)
+					var plantSN = JsonObject.plantDetail.snList	
+					getStep4(plantUID,plantSN,currentPower,totalValue)
 				}
 				catch (e){
 					currentPower = 0
@@ -117,3 +121,41 @@ function getStep3(plantUID){
 	}
 	xhr.send();
 }
+
+function getStep4(plantUID, plantSN, nowpower, totValue){
+	if (debugOutput) console.log("*********SolarPanel Start getStep4")
+	var reqDate = new Date()
+	var d = reqDate.getDate()
+	var m = reqDate.getMonth()+1
+	var y = reqDate.getFullYear()
+	if (debugOutput) console.log("*********SolarPanel getStep4 date: " + y + "-" + m + "-" + d)	
+		
+	var url = "https://fop.saj-electric.com/saj/monitor/site/getPlantDetailChart2?plantuid=" + plantUID + "&chartDateType=1&deviceSnArr=R5X2502J2208E10935&chartCountType=2&chartDay=" + + y + "-" + m + "-" + d
+	if (debugOutput) console.log("*********SolarPanel getStep4 url: " + url)	
+
+	var xhr = new XMLHttpRequest();
+	xhr.open("GET", url, true);
+    xhr.setRequestHeader('Connection', 'keep-alive');
+	xhr.onreadystatechange = function() { // Call a function when the state changes.
+		if (xhr.readyState == XMLHttpRequest.DONE) {
+			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
+				try {
+					if (debugOutput) console.log(xhr.responseText)
+					var JsonString = xhr.responseText
+					var JsonObject= JSON.parse(JsonString)
+					var today2 = Math.floor(JsonObject.dayEnergy  * 1000)
+					if (debugOutput) console.log("*********SolarPanel getStep3 today2: " + today2)	
+					parseReturnData(nowpower,totValue,today2,0,0,0,0,xhr.status,"succes")
+				}
+				catch (e){
+					currentPower = 0
+					parseReturnData(0,totValue,todayValue,0,0,0,0, xhr.status,"error")
+				}
+			} else {
+				parseReturnData(nowpower,totValue,0,0,0,0,0, xhr.status,"error")
+			}
+		}
+	}
+	xhr.send();
+}
+
