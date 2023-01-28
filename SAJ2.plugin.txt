@@ -82,7 +82,7 @@ function getStep2(){
 
 
 
-function getStep3(plantUUID){
+function getStep3(plantUID){
 	if (debugOutput) console.log("*********SolarPanel Start getStep3")
 	var reqDate = new Date()
 	var d = reqDate.getDate()
