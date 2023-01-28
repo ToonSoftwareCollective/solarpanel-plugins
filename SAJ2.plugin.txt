@@ -47,6 +47,7 @@ function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 			}
 		}
 	}
+	xhr.send();
 }
 
 
@@ -114,5 +115,5 @@ function getStep3(token){
 			}
 		}
 	}
-	xhr.send(data);
+	xhr.send();
 }
