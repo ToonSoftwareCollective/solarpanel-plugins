@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     SAJ2                    /////////////
 /////////  Plugin to extract CSAJ from web data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -66,7 +66,8 @@ function getStep2(){
 					var JsonObject= JSON.parse(JsonString)
 					var plantName = JsonObject.plantList[0].plantname
 					var plantUUID = JsonObject.plantList[0].plantuid
-					getStep3(plantUUID)
+					var curPower = JsonObject. plantList[0].nowPower
+					getStep3(plantUUID, curPower)
 				}
 				catch (e){
 					currentPower = 0
@@ -82,7 +83,7 @@ function getStep2(){
 
 
 
-function getStep3(plantUID){
+function getStep3(plantUID, curPower){
 	if (debugOutput) console.log("*********SolarPanel Start getStep3")
 	var reqDate = new Date()
 	var d = reqDate.getDate()
@@ -103,7 +104,7 @@ function getStep3(plantUID){
 					if (debugOutput) console.log(xhr.responseText)
 					var JsonString = xhr.responseText
 					var JsonObject= JSON.parse(JsonString)
-					currentPower = JsonObject.plantDetail.nowPower
+					currentPower = String(curPower*100/100)
 					totalValue = Math.floor(JsonObject.plantDetail.totalElectricity  * 1000)
 					if (debugOutput) console.log("*********SolarPanel getStep3 currentPower: " + currentPower)	
 					if (debugOutput) console.log("*********SolarPanel getStep3 totalValue: " + totalValue)
@@ -158,4 +159,6 @@ function getStep4(plantUID, plantSN, nowpower, totValue){
 	}
 	xhr.send();
 }
+
+
 
