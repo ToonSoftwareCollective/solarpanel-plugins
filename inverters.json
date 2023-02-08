@@ -10,6 +10,7 @@
 			{"friendlyName":"Goodwe2", "filename":"GOODWE2", "data": ["Username","Password","SiteID"], "info":"Plugin voor Goodwe omvormers via het portal. Deze gebruiken als je wilt selecteren op naam van de installtie. Vul de naam in bij siteId."},
 			{"friendlyName":"Growatt", "filename":"GROW1", "data": ["Username","Password"], "info":"Plugin voor Growatt omvormers via het portal"},
 			{"friendlyName":"Home Assistant", "filename":"HOMEASSISTANT1", "data": ["URL","APIKey"], "info":"Plugin voor Home Assistant. Zie README.HOMEASSISTANT1.md voor sensor specificaties.Geef ip incl Port als 192.168.1.1:8123"},
+			{"friendlyName":"Homewizard", "filename":"HOMEWIZ1", "data": ["URL"], "info":"Plugin voor Wifi kWh meter van HomeWizard. ga naar in Home Wizard naar Settings, meters, jouw meter en zet Lokale API aan. Geef hier het IP adres van de kWh meter."},
 			{"friendlyName":"Hoymiles", "filename":"HOY1", "data": ["SiteID","Username","Password"], "info":"Plugin voor Hoymiles omvormers via het portal. SiteId wordt gevonden door bovenin het schem in de url tekijken als je bent ingelogd."},
 			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"], "info":"Plugin voor Kostal omvormers. (lokaal)"},
 			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"], "info":"Deze plugin maakt gebruik van het Omnik Portal. Soms gaat het portal de fout in met de dagwaarden."},
