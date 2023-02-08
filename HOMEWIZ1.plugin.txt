@@ -4,9 +4,9 @@
 /////////                   By Oepi-Loepi                  ///////////////
 
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-		if (debugOutput) console.log("*********SolarPanel Start getEnphaseData")
+		if (debugOutput) console.log("*********SolarPanel Start getHomewizardData")
 		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + "/api/v1/production", true)
+		http.open("GET", "http://" + urlString + "/api/v1/data", true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
@@ -14,18 +14,18 @@
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
 						var today2
-						currentPower = parseInt(JsonObject.wattsNow)
-						today2=parseInt(JsonObject.wattHoursToday)
-						totalValue= parseInt(JsonObject.wattHoursLifetime)
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+						currentPower = parseInt(JsonObject.active_power_w)
+						totalValue= (parseInt(JsonObject.total_power_export_t1_kwh)*1000) - (parseInt(JsonObject.total_power_import_t1_kwh)*1000)
+						today2 = totalValue - yesterdayTotal
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 					}
 					catch (e){
 						currentPower = 0
-						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
 				}
 			}
 		}
