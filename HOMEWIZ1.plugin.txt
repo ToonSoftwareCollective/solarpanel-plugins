@@ -1,0 +1,33 @@
+/////////             <version>1.0.0</version>
+/////////                     HOMEWIZ1                     /////////////
+/////////  Plugin to extract HomeWizard data for Toon ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getEnphaseData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + "/api/v1/production", true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var today2
+						currentPower = parseInt(JsonObject.wattsNow)
+						today2=parseInt(JsonObject.wattHoursToday)
+						totalValue= parseInt(JsonObject.wattHoursLifetime)
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+    	}
