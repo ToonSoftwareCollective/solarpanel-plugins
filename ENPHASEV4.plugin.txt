@@ -8,7 +8,7 @@
         var base64encoded =base64Encode(userName + ":" + passWord);
         if (debugOutput) console.log("*********SolarPanel base64encoded: " + base64encoded)
         var http = new XMLHttpRequest()
-        var url = "https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=" + enphaseV4Refresh_token:
+        var url = "https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=" + enphaseV4Refresh_token
         if (debugOutput) console.log("*********SolarPanel url: " + url)
         http.open("POST", url, true);
         http.setRequestHeader('Authorization', 'Basic ' + base64encoded);
