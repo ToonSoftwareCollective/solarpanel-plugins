@@ -17,15 +17,15 @@
 						currentPower = parseInt(JsonObject.active_power_w)
 						totalValue= (parseInt(JsonObject.total_power_export_t1_kwh)*1000) - (parseInt(JsonObject.total_power_import_t1_kwh)*1000)
 						today2 = totalValue - yesterdayTotal
-						parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 					}
 					catch (e){
 						currentPower = 0
-						parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
 				}
 			}
 		}
