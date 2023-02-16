@@ -3,6 +3,35 @@
 /////////  Plugin to extract Enphase V4 Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
+
+	function base64Encode(input) {
+		var keySTR = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+		var output = "";
+		var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+		var i = 0;
+		while (i < input.length) {
+			chr1 = input.charCodeAt(i++);
+			chr2 = input.charCodeAt(i++);
+			chr3 = input.charCodeAt(i++);
+
+			enc1 = chr1 >> 2;
+			enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+			enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+			enc4 = chr3 & 63;
+
+			if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+			} else if (isNaN(chr3)) {
+				enc4 = 64;
+			}
+			output = output +
+			keySTR.charAt(enc1) + keySTR.charAt(enc2) +
+			keySTR.charAt(enc3) +keySTR.charAt(enc4);
+		}
+		return output;
+	}
+
+
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
         var base64encoded =base64Encode(userName + ":" + passWord);
@@ -13,7 +42,7 @@
         http.open("POST", url, true);
         http.setRequestHeader('Authorization', 'Basic ' + base64encoded);
         http.onreadystatechange = function() { // Call a function when the state changes.
-	if (http.readyState === XMLHttpRequest.DONE) {
+			if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
 						if (debugOutput) console.log("http.status: " + http.status)
