@@ -13,7 +13,7 @@
         http.open("POST", url, true);
         http.setRequestHeader('Authorization', 'Basic ' + base64encoded);
         http.onreadystatechange = function() { // Call a function when the state changes.
-			iif (http.readyState === XMLHttpRequest.DONE) {
+	if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
 						if (debugOutput) console.log("http.status: " + http.status)
