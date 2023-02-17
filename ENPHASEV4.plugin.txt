@@ -31,39 +31,45 @@
 		return output;
 	}
 
-
+	
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-        var base64encoded =base64Encode(userName + ":" + passWord);
-        if (debugOutput) console.log("*********SolarPanel base64encoded: " + base64encoded)
-        var http = new XMLHttpRequest()
-        var url = "https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=" + enphaseV4Refresh_token
-        if (debugOutput) console.log("*********SolarPanel url: " + url)
-        http.open("POST", url, true);
-        http.setRequestHeader('Authorization', 'Basic ' + base64encoded);
-        http.onreadystatechange = function() { // Call a function when the state changes.
+        	var base64encoded =base64Encode(userName + ":" + passWord);
+        	if (debugOutput) console.log("*********SolarPanel base64encoded: " + base64encoded)	
+		var params = "refresh_token="+ enphaseV4Refresh_token.trim() + "&grant_type=refresh_token"
+		if (debugOutput) console.log("*********SolarPanel params : " + params )
+        	var http = new XMLHttpRequest()
+        	var url = "https://api.enphaseenergy.com/oauth/token"
+        	if (debugOutput) console.log("*********SolarPanel url: " + url)
+        	http.open("POST", url, true);
+		http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        	http.setRequestHeader('Authorization', 'Basic ' + base64encoded);
+        	http.onreadystatechange = function() { // Call a function when the state changes.
+			if (debugOutput) console.log("*********SolarPanel http.readyState: " + http.readyState)
 			if (http.readyState === XMLHttpRequest.DONE) {
-                if (http.status === 200 || http.status === 300  || http.status === 302) {
-                    try {
+				if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
+                		if (http.status === 200 || http.status === 300  || http.status === 302) {
+                   			try {
 						if (debugOutput) console.log("http.status: " + http.status)
 						if (debugOutput) console.log(http.responseText)
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
-						access_token = JsonObject.access_token
-						refresh_token = JsonObject.refresh_token
-						solarPanel_enphaseV4Refresh_token.write(enphaseV4Refresh_token)
+						enphaseV4Access_token = JsonObject.access_token
+						enphaseV4Refresh_token = JsonObject.refresh_token
+						solarPanel_enphaseV4Refresh_token.write(JsonObject.refresh_token)
 						getStep2(passWord,userName,apiKey,siteid,urlString,totalValue);
 					}
-                    catch (e){
-                        currentPower = 0
-                        parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
-                    }
-                } else {
-                    parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
-                }
-            }
-        }
-        http.send();
+                    			catch (e){
+                        			currentPower = 0
+                        			parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    			}
+                		} else {
+					if (debugOutput) console.log(http.responseText)
+                    			parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+                		}
+            		}
+        	}
+        	http.send(params);
     }
 
 
@@ -73,9 +79,11 @@
         var url = "https://api.enphaseenergy.com/api/v4/systems/" + siteid + "/summary?key=" + apiKey
         if (debugOutput) console.log("*********SolarPanel url: " + url)
         http.open("GET", url, true);
-        http.setRequestHeader('Authorization', 'Bearer ' + access_token);
+        http.setRequestHeader('Authorization', 'Bearer ' + enphaseV4Access_token.trim());
         http.onreadystatechange = function() { // Call a function when the state changes.
-            if (http.readyState === XMLHttpRequest.DONE) {
+	if (debugOutput) console.log("*********SolarPanel http.readyState: " + http.readyState)
+        if (http.readyState === XMLHttpRequest.DONE) {
+		if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
                        if (debugOutput) console.log(http.responseText)
@@ -84,6 +92,10 @@
                         currentPower = JsonObject.current_power
                         totalValue = JsonObject.energy_lifetime
                         var today2 =  JsonObject.energy_today
+			if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
+			if (debugOutput) console.log("*********SolarPanel today: " + today2)
+			if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
+						
                         parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
                     }
                     catch (e){
@@ -91,10 +103,13 @@
                         parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
                     }
                 } else {
-                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    if (debugOutput) console.log(http.responseText)
+                    parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
                 }
             }
         }
         http.send();
     }
+
+
 
