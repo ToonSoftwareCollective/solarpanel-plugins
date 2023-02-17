@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     ENPHASEV4                        /////////////
 /////////  Plugin to extract Enphase V4 Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
