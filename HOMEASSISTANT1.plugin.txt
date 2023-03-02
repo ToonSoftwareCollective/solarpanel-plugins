@@ -1,7 +1,10 @@
-/////////                <version>1.0.1</version>                /////////
+/////////                <version>1.0.2</version>                /////////
 /////////                     HOMEASSISTANT1                     /////////
 /////////  Plugin to extract Home Assistant Solar data for Toon  /////////
 /////////                        By Bonno                        /////////
+
+//////// v1.0.2 changed http to https
+
 function getSolarData(password, username, apiKey, siteId, urlString, totalPower) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
     var url = "https://" + urlString + "/api/states/sensor.solar_panel"
