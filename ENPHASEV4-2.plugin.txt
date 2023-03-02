@@ -110,6 +110,9 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
                         if (debugOutput) console.log(http.responseText)
                         if (http.responseText != ""){
                            checkToken(urlString,envoyfirmware,http.responseText,sessionID)
+                        }else{
+                            if (getDataCount === 0){apiKey = ""}
+                            if (getDataCount === 1){apiKey2 = ""}
                         }
                     }
                     catch (e){
@@ -145,6 +148,9 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
                            if (getDataCount === 0){apiKey = sessionID}
                            if (getDataCount === 1){apiKey2 = sessionID}
                            getD7data(urlString,authToken)
+                        }else{
+                            if (getDataCount === 0){apiKey = ""}
+                            if (getDataCount === 1){apiKey2 = ""}
                         }
                     }
                     catch (e){
