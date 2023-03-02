@@ -4,7 +4,7 @@
 /////////                        By Bonno                        /////////
 function getSolarData(password, username, apiKey, siteId, urlString, totalPower) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
-    var url = "http://" + urlString + "/api/states/sensor.solar_panel"
+    var url = "https://" + urlString + "/api/states/sensor.solar_panel"
     var http = new XMLHttpRequest();
     if (debugOutput) console.log("*********SolarPanel HA url " + url) 
     http.open("GET", url, true)
