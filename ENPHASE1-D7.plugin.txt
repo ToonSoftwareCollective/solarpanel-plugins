@@ -1,0 +1,158 @@
+/////////             <version>1.0.0</version>
+/////////                     ENPHASE1-D7                     /////////////
+/////////    Plugin to extract Enphase data for Toon         ///////////////
+/////////                     By Oepi-Loepi                  ///////////////
+
+
+
+    function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarData")
+        var http = new XMLHttpRequest()
+        var url = "https://enlighten.enphaseenergy.com"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.setRequestHeader("Connection", "keep-alive")
+        http.onreadystatechange = function() {
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
+                        var token= http.responseText.split("csrf-token\" content=\"")[1].split("\" />")[0].split(".")[0]
+                        if (debugOutput) console.log("*********SolarPanel token:" + token)
+                        solarLogin(passWord,userName,token)
+
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+        http.send();
+    }
+
+
+    function solarLogin(passWord,userName,token){
+        if (debugOutput) console.log("*********SolarPanel Start solarLogin")
+        var http = new XMLHttpRequest()
+        var request = "utf8=%E2%9C%93&authenticity_token="+ encodeURIComponent(token) +"&user%5Bemail%5D=" + encodeURIComponent(userName) + "&user%5Bpassword%5D=" + encodeURIComponent(passWord) + "&commit=Aanmelden"
+        if (debugOutput) console.log("request:" +request)
+        var url = "https://enlighten.enphaseenergy.com/login/login"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("POST", url, true);
+        http.withCredentials = true;
+        http.setRequestHeader("Connection", "keep-alive")
+        http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        http.onreadystatechange = function() {
+            if (http.readyState === 3 && http.status === 302) {
+                try {
+                    var location = http.getResponseHeader("Location").split("web/")[1].split("?")[0]
+                    if (debugOutput) console.log("Location: " + location)
+                    http.abort()
+                    getSolarToday(location);
+                }
+                catch (e){
+                    currentPower = 0
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            } else {
+                parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+            }
+        }
+        http.send(request);
+    }
+
+    function getSolarGeneralPage(Location){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarGeneralPage")
+        var http = new XMLHttpRequest()
+        var url = "https://enlighten.enphaseenergy.com/web/" + Location + "?v=3.4.0"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() {
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log(http.responseText)
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+        http.send();
+    }
+
+    function getSolarToday(Location){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarToda")
+        var http = new XMLHttpRequest()
+        var url = "https://enlighten.enphaseenergy.com/pv/systems/" + Location + "/today"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() {
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        var JsonString = http.responseText
+                        var JsonObject= JSON.parse(JsonString)
+                        var todayEnphase = JsonObject.stats[0].totals.production
+                        if (debugOutput) console.log("*********SolarPanel today: " + todayEnphase)
+                        var currentEnphase = JsonObject.latest_power.value
+                        if (debugOutput) console.log("*********SolarPanel current: " + currentEnphase)
+                        getSolarLifetime(Location,todayEnphase,currentEnphase)
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+        http.send();
+    }
+
+    function getSolarLifetime(Location,todayEnphase,currentEnphase){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarLifetime")
+        var http = new XMLHttpRequest()
+        var url = "https://enlighten.enphaseenergy.com/pv/systems/" + Location + "/lifetime_energy"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() { // Call a function when the state changes.
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log(http.responseText)
+                        var JsonString = http.responseText
+                        var JsonObject= JSON.parse(JsonString)
+                        var newarray = JsonObject.production
+                        var totalLifetimeEnphase = 0
+                        for(var counter in newarray){
+                            if (debugOutput) console.log("newarray[" + counter + "]: " + newarray[counter])
+                            totalLifetimeEnphase= totalLifetimeEnphase + parseInt(newarray[counter])
+                        }
+                        if (debugOutput) console.log(" totalLifetime: " +  totalLifetimeEnphase)
+                        parseReturnData(currentEnphase,totalLifetimeEnphase,todayEnphase,0,0,0,0,http.status,"succes")
+
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+        http.send();
+    }
