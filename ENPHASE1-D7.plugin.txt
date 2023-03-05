@@ -12,14 +12,21 @@
         if (debugOutput) console.log("*********SolarPanel url: " + url)
         http.open("GET", url, true);
         http.setRequestHeader("Connection", "keep-alive")
+		http.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
         http.onreadystatechange = function() {
             if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
                         if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
-                        var token= http.responseText.split("csrf-token\" content=\"")[1].split("\" />")[0].split(".")[0]
-                        if (debugOutput) console.log("*********SolarPanel token:" + token)
-                        solarLogin(passWord,userName,token)
+						if (debugOutput) console.log(http.responseText)
+                        if(http.responseText.indexOf("csrf-token\" content=\"")>0){
+							var token= http.responseText.split("csrf-token\" content=\"")[1].split("\" />")[0].trim()
+							if (debugOutput) console.log("*********SolarPanel token:" + token)
+							solarLogin(passWord,userName,token)
+						}else{
+							if (debugOutput) console.log("*********SolarPanel still logged in")
+							getSolarToday("3969866");
+						}
                     }
                     catch (e){
                         currentPower = 0
