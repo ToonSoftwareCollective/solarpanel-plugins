@@ -5,7 +5,8 @@
 
 
 
-    function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+    function getSolarData(passWord,userName,apiKeyPlugin,siteid,urlString,totalValue){
+		
         if (debugOutput) console.log("*********SolarPanel Start getSolarData")
         var http = new XMLHttpRequest()
         var url = "https://enlighten.enphaseenergy.com"
@@ -22,10 +23,17 @@
                         if(http.responseText.indexOf("csrf-token\" content=\"")>0){
 							var token= http.responseText.split("csrf-token\" content=\"")[1].split("\" />")[0].trim()
 							if (debugOutput) console.log("*********SolarPanel token:" + token)
+							if (getDataCount == 0){apiKey = ""}
+							if (getDataCount == 1){apiKey2 = ""}
 							solarLogin(passWord,userName,token)
 						}else{
 							if (debugOutput) console.log("*********SolarPanel still logged in")
-							getSolarToday("3969866");
+								if (apiKeyPlugin !=""){
+									getSolarToday(apiKeyPlugin)
+								}else{
+									currentPower = 0
+									parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+								}
 						}
                     }
                     catch (e){
@@ -58,6 +66,8 @@
 						var location = http.getResponseHeader("Location").split("web/")[1].split("?")[0]
 						if (debugOutput) console.log("*********SolarPanel Location: " + location)
 						http.abort()
+						if (getDataCount == 0){apiKey = location}
+						if (getDataCount == 1){apiKey2 = location}
 						getSolarToday(location);
 					}
 					catch (e){
@@ -161,4 +171,5 @@
         }
         http.send();
     }
+
 
