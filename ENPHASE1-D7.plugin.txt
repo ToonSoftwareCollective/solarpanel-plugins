@@ -20,7 +20,6 @@
                         var token= http.responseText.split("csrf-token\" content=\"")[1].split("\" />")[0].split(".")[0]
                         if (debugOutput) console.log("*********SolarPanel token:" + token)
                         solarLogin(passWord,userName,token)
-
                     }
                     catch (e){
                         currentPower = 0
@@ -47,20 +46,18 @@
         http.setRequestHeader("Connection", "keep-alive")
         http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         http.onreadystatechange = function() {
-            if (http.readyState === 3 && http.status === 302) {
-                try {
-                    var location = http.getResponseHeader("Location").split("web/")[1].split("?")[0]
-                    if (debugOutput) console.log("Location: " + location)
-                    http.abort()
-                    getSolarToday(location);
-                }
-                catch (e){
-                    currentPower = 0
-                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
-                }
-            } else {
-                parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
-            }
+				if (http.readyState === 3 && http.status === 302) {
+					try {
+						var location = http.getResponseHeader("Location").split("web/")[1].split("?")[0]
+						if (debugOutput) console.log("*********SolarPanel Location: " + location)
+						http.abort()
+						getSolarToday(location);
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} 
         }
         http.send(request);
     }
@@ -75,7 +72,7 @@
             if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
-                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
                         if (debugOutput) console.log(http.responseText)
                     }
                     catch (e){
@@ -100,7 +97,7 @@
             if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
-                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
                         var JsonString = http.responseText
                         var JsonObject= JSON.parse(JsonString)
                         var todayEnphase = JsonObject.stats[0].totals.production
@@ -131,19 +128,20 @@
             if (http.readyState === XMLHttpRequest.DONE) {
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
-                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
                         if (debugOutput) console.log(http.responseText)
                         var JsonString = http.responseText
                         var JsonObject= JSON.parse(JsonString)
                         var newarray = JsonObject.production
                         var totalLifetimeEnphase = 0
                         for(var counter in newarray){
-                            if (debugOutput) console.log("newarray[" + counter + "]: " + newarray[counter])
+                            if (debugOutput) console.log("*********SolarPanel newarray[" + counter + "]: " + newarray[counter])
                             totalLifetimeEnphase= totalLifetimeEnphase + parseInt(newarray[counter])
                         }
-                        if (debugOutput) console.log(" totalLifetime: " +  totalLifetimeEnphase)
-                        parseReturnData(currentEnphase,totalLifetimeEnphase,todayEnphase,0,0,0,0,http.status,"succes")
-
+						currentPower = parseInt(currentEnphase)
+						totalValue = parseInt(totalLifetimeEnphase)
+						var today2 = todayEnphase
+						parseReturnData(currentPower, totalValue, today2 ,0,0,0,0,http.status,"succes")
                     }
                     catch (e){
                         currentPower = 0
@@ -156,3 +154,4 @@
         }
         http.send();
     }
+
