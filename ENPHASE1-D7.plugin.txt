@@ -26,6 +26,12 @@
 							if (getDataCount == 0){apiKey = ""}
 							if (getDataCount == 1){apiKey2 = ""}
 							solarLogin(passWord,userName,token)
+						} else if(http.responseText.indexOf("<body>You are being <")>0){
+							var location= http.responseText.split("web/")[1].split("?")[0]
+							if (debugOutput) console.log("*********SolarPanel location:" + location)
+							if (getDataCount == 0){apiKey = location}
+							if (getDataCount == 1){apiKey2 = location}
+							getSolarToday(location)
 						}else{
 							if (debugOutput) console.log("*********SolarPanel still logged in")
 								if (apiKeyPlugin !=""){
@@ -171,5 +177,3 @@
         }
         http.send();
     }
-
-
