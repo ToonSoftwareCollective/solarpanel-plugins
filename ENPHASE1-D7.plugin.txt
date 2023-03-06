@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     ENPHASE1-D7                     /////////////
 /////////    Plugin to extract Enphase data for Toon         ///////////////
 /////////                     By Oepi-Loepi                  ///////////////
@@ -159,7 +159,9 @@
                         var totalLifetimeEnphase = 0
                         for(var counter in newarray){
                             if (debugOutput) console.log("*********SolarPanel newarray[" + counter + "]: " + newarray[counter])
-                            totalLifetimeEnphase= totalLifetimeEnphase + parseInt(newarray[counter])
+			    if (newarray[counter] != null && newarray[counter] != NaN){
+                            	totalLifetimeEnphase= totalLifetimeEnphase + parseInt(newarray[counter])
+			    }
                         }
 						currentPower = parseInt(currentEnphase)
 						totalValue = parseInt(totalLifetimeEnphase)
