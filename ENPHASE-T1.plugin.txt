@@ -236,7 +236,6 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
 
     function parseEnphaseD7(totalValue){
         if (debugOutput) console.log("*********SolarPanel Start parseEnphaseD7")
-		solarEnphaseScrapeDelayStop()
         var http = new XMLHttpRequest()
         var url = "file:///tmp/enphase_D7_return.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
