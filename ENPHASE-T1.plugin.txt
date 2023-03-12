@@ -6,11 +6,10 @@
 	function getSolarData(passWord,userName,sessionID,siteid,urlString,totalValue){
 		var sessionID = apiKey
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-		if (getDataCount == 0){getEnphaseStep1(1,urlString,passWord,userName,sessionID);}
-		if (getDataCount == 1){getEnphaseStep1(2,urlString,passWord,userName,sessionID);}
+		getEnphaseStep1(urlString,passWord,userName,sessionID);
     }
 
-	function getEnphaseStep1(number,urlString,passWord,userName,sessionID){
+	function getEnphaseStep1(urlString,passWord,userName,sessionID){
 		var onetime = true
 		if (debugOutput) console.log("*********SolarPanel Start getEnphaseStep1()")
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
@@ -25,13 +24,13 @@
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
 				onetime = false
-				parseEnpaseInfo(number,urlString,passWord,userName,sessionID)
+				parseEnpaseInfo(urlString,passWord,userName,sessionID)
 			}
 		})
 	}
 
 
-function parseEnpaseInfo(number,urlString,passWord,userName,sessionID,totalValue){
+function parseEnpaseInfo(urlString,passWord,userName,sessionID,totalValue){
     if (debugOutput) console.log("*********SolarPanel parsing Info data after TSC command")
     var http = new XMLHttpRequest()
     var url = "file:///tmp/enphase_info_return.txt"
@@ -56,7 +55,7 @@ function parseEnpaseInfo(number,urlString,passWord,userName,sessionID,totalValue
                     if (debugOutput) console.log("envoyfirmware: " + envoyfirmware)
 
                     if (envoyfirmware === 'D7' & sessionID  === ''){
-                        startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware,totalValue)
+                        startLogin(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue)
                     }
 
                     if (envoyfirmware === 'D7' & sessionID !== ''){
@@ -82,7 +81,7 @@ function parseEnpaseInfo(number,urlString,passWord,userName,sessionID,totalValue
 }
 
 
-function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware, totalValue){
+function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, totalValue){
     if (debugOutput) console.log("*********SolarPanel Start startLogin")
     var http = new XMLHttpRequest()
     var url = "https://enlighten.enphaseenergy.com/login/login.json?&user[password]=" + passWord + "&user[email]=" + userName
@@ -99,7 +98,7 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
                     var JsonString = http.responseText
                     var JsonObject= JSON.parse(JsonString)
                     var tempSession =  JsonObject.session_id
-                    getToken(number,tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue)
+                    getToken(tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue)
                 }
                 catch (e){
                     currentPower = 0
@@ -113,7 +112,7 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
     http.send();
 }
 
-   function  getToken(number,tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue){
+   function  getToken(tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue){
         if (debugOutput) console.log("*********SolarPanel Start getToken")
         var http = new XMLHttpRequest()
         var url = "https://entrez.enphaseenergy.com/tokens"
@@ -130,10 +129,10 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
                         if (debugOutput) console.log("http.status: " + http.status)
                         if (debugOutput) console.log(http.responseText)
                         if (http.responseText != ""){
-                           checkToken(number,tempSession, urlString,http.responseText,totalValue)
+                           checkToken(tempSession, urlString,http.responseText,totalValue)
                         }else{
-                            if (number === 1){apiKey = ""}
-                            if (number === 2){apiKey2 = ""}
+                            if (getDataCount == 0){apiKey = ""}
+                            if (getDataCount == 1){apiKey2 = ""}
                         }
                     }
                     catch (e){
@@ -149,7 +148,7 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
     }
 
 
-    function checkToken(number,tempSession,urlString,apiKeyPlugin,totalValue){
+    function checkToken(tempSession,urlString,apiKeyPlugin,totalValue){
 		var onetime = true
         if (debugOutput) console.log("*********SolarPanel Start checkToken()")
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
@@ -165,12 +164,12 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
 				onetime = false
-				parseEnpaseToken(number,urlString,passWord,userName,apiKeyPlugin,totalValue)
+				parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue)
 			}
 		})
 	}
 		
-	function parseEnpaseToken(number,urlString,passWord,userName,apiKeyPlugin,totalValue){
+	function parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start parseEnpaseToken()")
 		if (debugOutput) console.log("*********SolarPanel apiKeyPlugin: " + apiKeyPlugin)
         var http = new XMLHttpRequest()
@@ -190,12 +189,12 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
 						   //get cookie data from response
 						   var locsessionID= http.responseText.split("sessionId=")[1].split(";")[0]
 						   if (debugOutput) console.log("apiKeyPlugin: " + locsessionID)   
-                           if (number === 1){apiKey = locsessionID}
-                           if (number === 2){apiKey2 = locsessionID}
+                           if (getDataCount == 0){apiKey = locsessionID}
+                           if (getDataCount == 1){apiKey2 = locsessionID}
                            getD7data(urlString,locsessionID,totalValue)
                         }else{
-                            if (number === 1){apiKey = ""}
-                            if (number === 2){apiKey2 = ""}
+                            if (getDataCount == 0){apiKey = ""}
+                            if (getDataCount == 1){apiKey2 = ""}
                         }
                     }
                     catch (e){
@@ -249,8 +248,8 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
                         if (debugOutput) console.log("http.status: " + http.status)
                         if (debugOutput) console.log(http.responseText)
 						if (http.responseText.indexOf("401 Authorization Required")>0){
-							if (number === 1){apiKey = ""}
-							if (number === 2){apiKey2 = ""}
+							if (getDataCount == 0){apiKey = ""}
+							if (getDataCount == 1){apiKey2 = ""}
 						}else{
 							var JsonObject= JSON.parse(http.responseText)
 							var today2
@@ -270,8 +269,8 @@ function startLogin(number,passWord,userName,urlString,envoyserial,envoyfirmware
                     }
                 } else {
 					if (http.status === 401){
-						if (number === 1){apiKey = ""}
-                        if (number === 2){apiKey2 = ""}
+						if (getDataCount == 0){apiKey = ""}
+                        if (getDataCount == 1){apiKey2 = ""}
 					}
                      parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
                 }
