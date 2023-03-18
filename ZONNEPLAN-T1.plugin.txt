@@ -25,12 +25,15 @@
 		}
 		if (debugOutput) console.log("*********SolarPanel refreshtoken " + rfToken)
 		if (debugOutput) console.log("*********SolarPanel haal de zonneplan info op via tsc command")
-		var doc4 = new XMLHttpRequest()
-		doc4.open("PUT", "file:///tmp/tsc.command")
-		doc4.send("zonneplan")
+		
 		var doc2 = new XMLHttpRequest()
 		doc2.open("PUT", "file:///tmp/zonneplan_refresh.txt")
 		doc2.send(rfToken)
+		
+		var doc4 = new XMLHttpRequest()
+		doc4.open("PUT", "file:///tmp/tsc.command")
+		doc4.send("solarPanel")
+		
 		//wacht op een response vanuit het TSC script
 		solarDelay(8000, function() {
 			parseRefreshToken(number)
@@ -83,9 +86,7 @@
 		}else{
 			if (debugOutput) console.log("*********SolarPanel token " + zonneplanToken2)
 		}
-		var doc4 = new XMLHttpRequest();
-		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("zonneplan");
+		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/zonneplan_step1.txt");
 		if(number===1){
@@ -93,6 +94,11 @@
 		}else{
 			doc2.send(zonneplanToken2)
 		}
+		
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("solarPanel");
+		
 		//wacht op een response vanuit het TSC script
 		solarDelay2(8000, function() {
 			if(number===1){
@@ -150,9 +156,7 @@
 		if (debugOutput) console.log("*********SolarPanel Start getZonneplanStep2()")
 		if (debugOutput) console.log("*********SolarPanel haal de zonneplan info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel connect " + connect)
-		var doc4 = new XMLHttpRequest();
-		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("zonneplan");
+		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/zonneplan_step2.txt");
 		if(number===1){
@@ -160,6 +164,11 @@
 		}else{
 			doc2.send(connect + ";" + zonneplanToken2);
 		}
+		
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("solarPanel");
+		
 		solarDelay3(8000, function() {
 			parseZonneplanStep2(number)
 		})
