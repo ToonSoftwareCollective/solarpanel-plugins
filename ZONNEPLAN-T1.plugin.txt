@@ -35,8 +35,12 @@
 		doc4.send("solarPanel")
 		
 		//wacht op een response vanuit het TSC script
-		solarDelay(8000, function() {
-			parseRefreshToken(number)
+		var onetime = true
+		zonneplanDelayTimer(8000, function() {
+			if (onetime){
+				onetime = false
+				parseRefreshToken(number)
+			}
 		})
 	}
 
@@ -100,11 +104,15 @@
 		doc4.send("solarPanel");
 		
 		//wacht op een response vanuit het TSC script
-		solarDelay2(8000, function() {
-			if(number===1){
-				parseZonneplanStep1(1)
-			}else{
-				parseZonneplanStep1(2)
+		var onetime = true
+		zonneplanDelayTimer(8000, function() {
+			if (onetime){
+				onetime = false
+				if(number===1){
+					parseZonneplanStep1(1)
+				}else{
+					parseZonneplanStep1(2)
+				}
 			}
 		})
 	}
@@ -169,8 +177,12 @@
 		doc4.open("PUT", "file:///tmp/tsc.command");
 		doc4.send("solarPanel");
 		
-		solarDelay3(8000, function() {
-			parseZonneplanStep2(number)
+		var onetime = true
+		zonneplanDelayTimer(8000, function() {
+			if (onetime){
+				onetime = false
+				parseZonneplanStep2(number)
+			}
 		})
 	}
 
@@ -217,9 +229,7 @@
 		}
 		http.send();
 	}
-	
-	
-	
+
 
 	
 	
