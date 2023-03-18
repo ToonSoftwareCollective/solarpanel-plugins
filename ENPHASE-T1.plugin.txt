@@ -14,12 +14,15 @@
 		if (debugOutput) console.log("*********SolarPanel Start getEnphaseStep1()")
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel enphase info url " + urlString)
-		var doc4 = new XMLHttpRequest();
-		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("enphase");
+		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/enphase_info.txt");
 		doc2.send(urlString)
+
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("solarPanel");
+
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
@@ -154,12 +157,15 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel enphase checktoken url " + urlString)
 		if (debugOutput) console.log("*********SolarPanel enphase checktoken apiKeyPlugin " + apiKeyPlugin)
-		var doc4 = new XMLHttpRequest();
-		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("enphase");
+		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/enphase_token.txt");
 		doc2.send(urlString + ";" + apiKeyPlugin);
+
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("solarPanel");
+
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
@@ -216,12 +222,15 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel enphase getD7data url " + urlString)
 		if (debugOutput) console.log("*********SolarPanel enphase getD7data sessionID " + sessionID)
-		var doc4 = new XMLHttpRequest();
-		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("enphase");
+		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/enphase_D7.txt");
 		doc2.send(urlString + ";" + sessionID);
+
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("solarPanel");
+
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
