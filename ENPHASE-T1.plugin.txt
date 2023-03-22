@@ -21,7 +21,7 @@
 
 		var doc4 = new XMLHttpRequest();
 		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("solarPanel");
+		doc4.send("external-solarPanel");
 
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
@@ -164,7 +164,7 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
 
 		var doc4 = new XMLHttpRequest();
 		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("solarPanel");
+		doc4.send("external-solarPanel");
 
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
@@ -229,7 +229,7 @@ function startLogin(passWord,userName,urlString,envoyserial,envoyfirmware, total
 
 		var doc4 = new XMLHttpRequest();
 		doc4.open("PUT", "file:///tmp/tsc.command");
-		doc4.send("solarPanel");
+		doc4.send("external-solarPanel");
 
 		//wacht op een response vanuit het TSC script
 		solarEnphaseDelay(8000, function() {
