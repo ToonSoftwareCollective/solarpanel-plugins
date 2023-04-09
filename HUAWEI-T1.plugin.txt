@@ -1,5 +1,5 @@
 /////////             <version>1.0.0</version>
-/////////                     HUAWEI1-T1                       /////////////
+/////////                     HUAWEI-T1                       /////////////
 /////////  Plugin to extract Huawei Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
