@@ -17,6 +17,7 @@
 		doc4.send("external-solarPanel");
 
 		//wacht op een response vanuit het TSC script
+		var onetime =true
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
 				onetime = false
@@ -41,9 +42,9 @@
                         if (debugOutput) console.log(http.responseText)
 							var JsonObject= JSON.parse(http.responseText)
 							var today2
-							currentPower = parseInt(JsonObject.data.list.currentPower)
-							today2=parseInt(JsonObject.data.list.dailyEnergy)
-							totalValue= parseInt(JsonObject.data.list.cumulativeEnergy)
+							currentPower = parseInt(JsonObject.data.list[0].currentPower * 1000)
+							today2=parseInt(JsonObject.data.list[0].dailyEnergy  * 1000)
+							totalValue= parseInt(JsonObject.data.list[0].cumulativeEnergy* 1000)
 							if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
 							if (debugOutput) console.log("*********SolarPanel today2: " + today2)
 							if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
