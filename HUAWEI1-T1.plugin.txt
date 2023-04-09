@@ -25,7 +25,6 @@
 		})
 	}
 		
-		
     function parseHuawei(totalValue){
         if (debugOutput) console.log("*********SolarPanel Start parseHuawei")
         var http = new XMLHttpRequest()
@@ -42,9 +41,9 @@
                         if (debugOutput) console.log(http.responseText)
 							var JsonObject= JSON.parse(http.responseText)
 							var today2
-							currentPower = parseInt(JsonObject.production[0].wNow)
-							today2=parseInt(JsonObject.production[1].whToday)
-							totalValue= parseInt(JsonObject.production[0].whLifetime)
+							currentPower = parseInt(JsonObject.data.list.currentPower)
+							today2=parseInt(JsonObject.data.list.dailyEnergy)
+							totalValue= parseInt(JsonObject.data.list.cumulativeEnergy)
 							if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
 							if (debugOutput) console.log("*********SolarPanel today2: " + today2)
 							if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
