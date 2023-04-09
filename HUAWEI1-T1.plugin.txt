@@ -1,0 +1,63 @@
+/////////             <version>1.0.0</version>
+/////////                     HUAWEI1-T1                       /////////////
+/////////  Plugin to extract Huawei Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
+		if (debugOutput) console.log("*********SolarPanel Start Huawei")
+		if (debugOutput) console.log("*********SolarPanel haal de huawei info op via tsc command")
+		
+		var doc2 = new XMLHttpRequest();
+		doc2.open("PUT", "file:///var/tmp/huawei_passw.txt");
+		doc2.send(userName + ";" + passWord);
+
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///var/tmp/tsc.command");
+		doc4.send("external-solarPanel");
+
+		//wacht op een response vanuit het TSC script
+		solarEnphaseDelay(8000, function() {
+			if (onetime){
+				onetime = false
+				parseHuawei(totalValue)
+			}
+		})
+	}
+		
+		
+    function parseHuawei(totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start parseHuawei")
+        var http = new XMLHttpRequest()
+        var url = "file:///var/tmp/huaweistep2.txt"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() { // Call a function when the state changes.
+            if (debugOutput) console.log("http.readyState: " + http.readyState)
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (debugOutput) console.log("http.status: " + http.status)
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log(http.responseText)
+							var JsonObject= JSON.parse(http.responseText)
+							var today2
+							currentPower = parseInt(JsonObject.production[0].wNow)
+							today2=parseInt(JsonObject.production[1].whToday)
+							totalValue= parseInt(JsonObject.production[0].whLifetime)
+							if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
+							if (debugOutput) console.log("*********SolarPanel today2: " + today2)
+							if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+       http.send();
+    }
