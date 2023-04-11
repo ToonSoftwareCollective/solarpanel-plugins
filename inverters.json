@@ -1,6 +1,7 @@
 {"plugins":[
 			{"friendlyName":"APS (Altenergy)", "filename":"APS1", "data": ["Username","Password"], "info":"Plugin voor APSystems (Altenergy Power). Werkt via het webportal dus login voor de webinterface nodig"},
 			{"friendlyName":"Canadian Solar", "filename":"CSI1", "data": ["Username","Password"], "info":"Plugin voor Canadian Solar. Geef de naam en wachtwoord van de https://monitoring.csisolar.com site"},
+			{"friendlyName":"DeltaSolar", "filename":"DELTA1", "data": ["Username","Password"], "info":"Plugin voor DeltaSolar omvormers met naam en wachtwoord (van de app)"},
 			{"friendlyName":"Domoticz", "filename":"DOM-DOUBLE1", "data": ["IDX","URL"], "info":"Plugin voor Domoticz. Voor enkele omvormer, geef 1 IDX, voor een dubbele omvormer geef 2 IDX als bijvoorbeeld 12+19. Geef ip incl Port als 192.168.2.86:8084"},
 			{"friendlyName":"Enphase 1", "filename":"ENPHASE1", "data": ["URL"], "info":"Plugin voor Enphase omvormers. (lokaal)"},
 			{"friendlyName":"Enphase D7", "filename":"ENPHASE1-D7", "data": ["Username", "Password"], "info":"Geef de naam en wachtwoord van de https://enlighten.enphaseenergy.com site"},
