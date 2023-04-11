@@ -1,0 +1,91 @@
+/////////             <version>1.0.0</version>
+/////////                     DELTA1                       /////////////
+/////////  Plugin to extract Delta Solar data for Toon  ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
+		if (debugOutput) console.log("*********SolarPanel Start Delta")
+		if (debugOutput) console.log("*********SolarPanel haal de Delta info op via tsc command")
+		
+		var doc2 = new XMLHttpRequest();
+		doc2.open("PUT", "file:///var/tmp/delta_passw.txt");
+		doc2.send(userName + ";" + passWord);
+
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///var/tmp/tsc.command");
+		doc4.send("external-solarPanel");
+
+		//wacht op een response vanuit het TSC script
+		var onetime =true
+		solarEnphaseDelay(8000, function() {
+			if (onetime){
+				onetime = false
+				parseDelta(totalValue)
+			}
+		})
+	}
+		
+    function parseDelta(totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start parseDelta")
+        var http = new XMLHttpRequest()
+        var url = "file:///var/tmp/delta_energy.txt"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() { // Call a function when the state changes.
+            if (debugOutput) console.log("http.readyState: " + http.readyState)
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (debugOutput) console.log("http.status: " + http.status)
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log(http.responseText)
+							var JsonObject= JSON.parse(http.responseText)
+							totalValue= parseInt(JsonObject.le[0])
+							var today2 = parseInt(JsonObject.te[0])
+							parseDelta2(totalValue,today )
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+       http.send();
+    }
+	
+    function parseDelta2(totalValue,today2){
+        if (debugOutput) console.log("*********SolarPanel Start parseDelta")
+        var http = new XMLHttpRequest()
+        var url = "file:///var/tmp/delta_energy.txt"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() { // Call a function when the state changes.
+            if (debugOutput) console.log("http.readyState: " + http.readyState)
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (debugOutput) console.log("http.status: " + http.status)
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("http.status: " + http.status)
+                        if (debugOutput) console.log(http.responseText)
+							var JsonObject= JSON.parse(http.responseText)
+							currentPower = parseInt(jsonData.top[JsonObject.top.length-1])
+							if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
+							if (debugOutput) console.log("*********SolarPanel today2: " + today2)
+							if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
+							parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+       http.send();
+    }
