@@ -3,10 +3,6 @@
 /////////  Plugin to extract Delta Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-/////////             <version>1.0.0</version>
-/////////                     DELTA1                       /////////////
-/////////  Plugin to extract Delta Solar data for Toon  ///////////////
-/////////                   By Oepi-Loepi                  ///////////////
 
     function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
         if (debugOutput) console.log("*********SolarPanel Start getSolarData")
