@@ -122,8 +122,9 @@
         xhr.send();
     }
 	
-	function parseSolisJson(totalValue){
-         if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
+	
+    function parseSolisJson(totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
         var http = new XMLHttpRequest()
         var url = "file:///tmp/solis_output.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
@@ -136,7 +137,8 @@
                     try {
                         if (debugOutput) console.log("http.status: " + http.status)
                         if (debugOutput) console.log(http.responseText)
-						today2=parseInt((JsonObject.data.page.records[0].dayEnergy) * 1000)
+                        var JsonObject= JSON.parse(http.responseText)	
+						var today2=parseInt((JsonObject.data.page.records[0].dayEnergy) * 1000)
 						totalValue= parseInt((JsonObject.data.page.records[0].allEnergy) * 1000000)
 						currentPower = parseInt((JsonObject.data.page.records[0].power) * 1000)
 						if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
@@ -159,3 +161,4 @@
         }
        http.send();
     }
+
