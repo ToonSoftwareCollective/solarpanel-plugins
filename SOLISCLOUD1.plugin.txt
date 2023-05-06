@@ -71,9 +71,7 @@
 
         var encryptedBody= Qt.md5(body)
         encryptedBody = base64( hexStr2bin(encryptedBody) )
-        //console.log(encryptedBody)
         var encryptedBodyEncoded = encodeURI(encryptedBody)
-        //console.log(encryptedBodyEncoded)
 
         var xhr = new XMLHttpRequest()
         var url = "https://codedev.tools/CryptoSecurity/GetHmacGenerator?text=POST%0A" + encryptedBodyEncoded + "%0Aapplication%2Fjson%0A" + newDate + "%0A%2Fv1%2Fapi%2FuserStationList&algorithm=SHA1&secretKey=" + keySecret
@@ -87,18 +85,16 @@
 						if (debugOutput) console.log("xhr.responseText: " + xhr.responseText)
 						var JsonObject= JSON.parse(xhr.responseText)
 						var encryptedHex = JsonObject.encryptedText
-						//console.log("encryptedHex : " + encryptedHex)
 						var encrypterdBase64 = base64( hexStr2bin(encryptedHex))
-						//console.log("encrypterdBase64 : " + encrypterdBase64)
 						var auth =  "API " + keyId + ":" + encrypterdBase64
 						var body = "{\"pageNo\":1,\"pageSize\":10}"
 
-						console.log("---------------------------------------------------------------")
-						console.log("Content-MD5: " + encryptedBody)
-						console.log("Content-Type: application/json")
-						console.log("Date: " + newDate)
-						console.log("Authorization: " + auth)
-						console.log("Port： " + port)
+						if (debugOutput) console.log("---------------------------------------------------------------")
+						if (debugOutput) console.log("Content-MD5: " + encryptedBody)
+						if (debugOutput) console.log("Content-Type: application/json")
+						if (debugOutput) console.log("Date: " + newDate)
+						if (debugOutput) console.log("Authorization: " + auth)
+						if (debugOutput) console.log("Port： " + port)
 						
 						var doc2 = new XMLHttpRequest();
 						doc2.open("PUT", "file:///tmp/solis.txt");
