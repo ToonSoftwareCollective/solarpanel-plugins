@@ -37,9 +37,9 @@
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getSolisStep1")
 		var body = "{\"pageNo\":1,\"pageSize\":10}"
-		var keyId= "1"
-		var keySecret = "f"
-		var port = "13333"
+		var keyId= userName
+		var keySecret = passWord
+		var port = siteid
 
         var result = ''
         var reqDate = new Date()
@@ -98,7 +98,6 @@
 						console.log("Content-Type: application/json")
 						console.log("Date: " + newDate)
 						console.log("Authorization: " + auth)
-						console.log("Body： " + body)
 						console.log("Port： " + port)
 						
 						var doc2 = new XMLHttpRequest();
@@ -115,16 +114,15 @@
 								onetime = false
 								parseSolisJson(totalValue)
 							}
-						}
+						})
 					}
                 }
             }
         xhr.send();
     }
 	
-	
-    function parseSolisJson(totalValue){
-        if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
+	function parseSolisJson(totalValue){
+         if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
         var http = new XMLHttpRequest()
         var url = "file:///tmp/solis_output.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
