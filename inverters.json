@@ -29,6 +29,7 @@
 			{"friendlyName":"Solarman", "filename":"SOLMAN1", "data": ["Username","Password"], "info":"Plugin voor Solarman. Geef de naam en wachtwoord van de https://home.solarmanpv.com/ site"},
 			{"friendlyName":"Solax", "filename":"SOLAX1", "data": ["SiteID", "APIKey"], "info":"Plugin voor Solax omvormers via het portal. De API key en de siteID wordt verkregen via het portal. Het siteID is het serienummer van de LAN module."},
 			{"friendlyName":"Solis (Ginglong)", "filename":"SOLIS1", "data": ["Username","Password"], "info":"Plugin voor Solis omvormers via het portal"},
+			{"friendlyName":"SolisCloud", "filename":"SOLISCLOUD1", "data": ["Username","Password","SiteID"], "info":"Vraag de sleutels aan bij Solis. (Gebr. naam=KeyId, Wachtwoord=keySecret,SiteID=Port). Zie voor info: toonforum.nl/d/633-aanvragen-van-soliscloud-sleutels-api"},
 			{"friendlyName":"ZeverSolar", "filename":"ZEVER1", "data": ["URL"], "info":"Plugin voor Zeversolar omvormers. (lokaal)"},
 			{"friendlyName":"Zonneplan T", "filename":"ZONNEPLAN-T1", "data": ["Username"], "info":"Geef een emailadres en klik op knop \"mail versturen\". Ga daarna naar je mail box en klik op mail bevestigen in de mail. Klik pas daarna op \"mail bevestigd\"."}
 ]
