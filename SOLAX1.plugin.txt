@@ -3,7 +3,7 @@
 /////////  Plugin to extract Solax Solar data for Toon     ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolaxData")
 		var http = new XMLHttpRequest();
 		http.open("GET", "https://www.solaxcloud.com:9443/proxy/api/getRealtimeInfo.do?tokenId=" + apiKey + "&sn=" + siteid, true)

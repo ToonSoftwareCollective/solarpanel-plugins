@@ -3,7 +3,7 @@
 /////////  Plugin to extract Huawei Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		if (debugOutput) console.log("*********SolarPanel Start Huawei")
 		if (debugOutput) console.log("*********SolarPanel haal de huawei info op via tsc command")

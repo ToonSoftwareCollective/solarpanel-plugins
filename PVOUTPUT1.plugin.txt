@@ -3,7 +3,7 @@
 /////////  Plugin to extract PVoutput data for Toon         ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start  getPVOutputData")
             var http = new XMLHttpRequest()
             var url = "https://pvoutput.org/service/r2/getstatus.jsp?stats=1"

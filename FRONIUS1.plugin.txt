@@ -3,7 +3,7 @@
 /////////  Plugin to extract Fronius Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getFroniusData")
 		var http = new XMLHttpRequest();
 		http.open("GET", "http://" + urlString + "/solar_api/v1/GetInverterRealtimeData.cgi?Scope=Device&DeviceID=1&DataCollection=CommonInverterData", true)

@@ -3,7 +3,7 @@
 /////////  Plugin to extract Delta Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		if (debugOutput) console.log("*********SolarPanel Start Delta")
 		if (debugOutput) console.log("*********SolarPanel haal de Delta info op via tsc command")

@@ -3,7 +3,7 @@
 /////////  Plugin to extract Growatt Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getGrowattStep1")
 		//modified hash : if first of pairs  is 0 then replace by c
 		var newpass= Qt.md5(passWord)

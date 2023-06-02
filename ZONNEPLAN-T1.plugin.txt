@@ -3,7 +3,7 @@
 /////////  Plugin to extract Zonneplan data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		if (getDataCount == 0){getZonneplanStep1(1);}
 		if (getDataCount == 1){getZonneplanStep1(2);}

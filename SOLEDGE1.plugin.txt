@@ -3,7 +3,7 @@
 /////////  Plugin to extract SolarEdge Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarEdgeData")
 		var fingerprint = "69 01 51 C2 49 16 4A 38 93 FA 7C A8 E4 BC 61 9A 25 4B 98 BF"
 		var http = new XMLHttpRequest();

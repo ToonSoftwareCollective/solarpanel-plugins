@@ -3,7 +3,7 @@
 /////////  Plugin to extract APS data for Toon         ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start  getAPSData")
 		userName = encodeURIComponent(userName)
         passWord = encodeURIComponent(passWord)

@@ -32,7 +32,7 @@
 	}
 
 	
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
         	var base64encoded =base64Encode(userName + ":" + passWord);
         	if (debugOutput) console.log("*********SolarPanel base64encoded: " + base64encoded)	
@@ -57,7 +57,7 @@
 						enphaseV4Access_token = JsonObject.access_token
 						enphaseV4Refresh_token = JsonObject.refresh_token
 						solarPanel_enphaseV4Refresh_token.write(JsonObject.refresh_token)
-						getStep2(passWord,userName,apiKey,siteid,urlString,totalValue);
+						getStep2(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower);
 					}
                     			catch (e){
                         			currentPower = 0
@@ -73,7 +73,7 @@
     }
 
 
-    function getStep2(passWord,userName,apiKey,siteid,urlString,totalValue){
+    function getStep2(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
         if (debugOutput) console.log("*********SolarPanel Start getStep2")
         var http = new XMLHttpRequest()
         var url = "https://api.enphaseenergy.com/api/v4/systems/" + siteid + "/summary?key=" + apiKey

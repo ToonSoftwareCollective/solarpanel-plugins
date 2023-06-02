@@ -5,7 +5,7 @@
 
 
 
-    function getSolarData(passWord,userName,apiKeyPlugin,siteid,urlString,totalValue){
+    function getSolarData(passWord,userName,apiKeyPlugin,siteid,urlString,useSSL,totalPower){
 		
         if (debugOutput) console.log("*********SolarPanel Start getSolarData")
         var http = new XMLHttpRequest()
