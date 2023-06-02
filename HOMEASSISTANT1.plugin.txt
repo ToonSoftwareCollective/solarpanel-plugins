@@ -7,7 +7,7 @@
 
 function getSolarData(password, username, apiKey, siteId, urlString, useSSL, totalPower) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
-    var protocol = (if useSSL == true) ? 'https' : 'http'
+    var protocol = (useSSL == true) ? 'https' : 'http'
     var url = protocol + "://" + urlString + "/api/states/sensor.solar_panel"
     var http = new XMLHttpRequest();
     if (debugOutput) console.log("*********SolarPanel HA url " + url) 
