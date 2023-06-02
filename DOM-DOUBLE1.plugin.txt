@@ -3,7 +3,7 @@
 /////////  Plugin to extract Domoticz (Double) Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                          ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		var arraynew = apiKey.split("+")
 		var firstIDX
 		var secondIDX
@@ -18,11 +18,11 @@
 			secondIDX = arraynew[1].trim()
 			number = 2
 		}	   
-		getStep2(number,firstIDX,secondIDX,urlString,totalValue)
+		getStep2(number,firstIDX,secondIDX,urlString,useSSL,totalPower)
 
     }
 		
-	function getStep2(number,firstIDX,secondIDX,urlString,totalValue){
+	function getStep2(number,firstIDX,secondIDX,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
 		http.open("GET", "http://" + urlString + "/json.htm?type=devices&rid=" + firstIDX, true)

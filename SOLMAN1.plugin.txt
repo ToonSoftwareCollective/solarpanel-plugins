@@ -103,7 +103,7 @@ function sha256(ascii) {
 }
 
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		var newHash = sha256(passWord);
 		if (debugOutput) console.log("*********SolarPanel new function sha256: " + newHash)

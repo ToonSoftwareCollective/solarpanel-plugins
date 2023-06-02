@@ -34,7 +34,7 @@
     }
 
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getSolisStep1")
 		var body = "{\"pageNo\":1,\"pageSize\":10}"
 		var keyId= userName

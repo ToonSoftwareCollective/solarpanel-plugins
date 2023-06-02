@@ -4,7 +4,7 @@
 /////////                   By Oepi-Loepi                  ///////////////
 
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 	if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 	var data = "{\"ERROR_BACK\":true,\"LOAD\":{\"loading\":true},\"body\":{\"password\":\"" + Qt.md5(passWord) + "\",\"user_name\":\"" + userName + "\"},\"WAITING_PROMISE\":true}";
 	var xhr = new XMLHttpRequest();

@@ -3,10 +3,11 @@
 /////////  Plugin to extract Domoticz Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + "/json.htm?type=devices&rid=" + apiKey, true)
+		var protocol = (useSSL == true) ? 'https' : 'http'
+		http.open("GET", protocol + "://" + urlString + "/json.htm?type=devices&rid=" + apiKey, true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {

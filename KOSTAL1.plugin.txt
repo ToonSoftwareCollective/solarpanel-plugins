@@ -3,7 +3,7 @@
 /////////  Plugin to extract Kostal Piko Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+function getSolarData(passWord,userName,apiKey,siteid,urlString,useSSL,totalPower){
 		var http = new XMLHttpRequest();
 		http.open("GET", "http://pvserver:pvwr@" + urlString, true)
 		http.onreadystatechange = function() {
