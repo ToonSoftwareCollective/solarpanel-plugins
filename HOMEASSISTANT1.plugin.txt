@@ -5,9 +5,10 @@
 
 //////// v1.0.2 changed http to https
 
-function getSolarData(password, username, apiKey, siteId, urlString, totalPower) {
+function getSolarData(password, username, apiKey, siteId, urlString, useSSL, totalPower) {
     if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
-    var url = "https://" + urlString + "/api/states/sensor.solar_panel"
+    var protocol = (if useSSL == true) ? 'https' : 'http'
+    var url = protocol + "://" + urlString + "/api/states/sensor.solar_panel"
     var http = new XMLHttpRequest();
     if (debugOutput) console.log("*********SolarPanel HA url " + url) 
     http.open("GET", url, true)
