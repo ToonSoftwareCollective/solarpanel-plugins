@@ -6,7 +6,7 @@
 	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 		if (debugOutput) console.log("*********SolarPanel Start getDomoticzData")
 		var http = new XMLHttpRequest();
-		http.open("GET", "http://" + urlString + "/json.htm?type=devices&rid=" + apiKey, true)
+		http.open("GET", "http://" + urlString + "/json.htm?type=command&param=getdevices&rid=" + apiKey, true)
 		http.onreadystatechange = function() {
 			if (http.readyState == XMLHttpRequest.DONE) {
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
