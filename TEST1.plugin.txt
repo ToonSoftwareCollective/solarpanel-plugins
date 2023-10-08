@@ -1,0 +1,152 @@
+/////////             <version>1.0.15</version>
+    /////////                     GROW1                        /////////////
+    /////////  Plugin to extract Growatt Solar data for Toon  ///////////////
+    /////////                   By Oepi-Loepi                  ///////////////
+
+        function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+            if (debugOutput) console.log("*********SolarPanel Start getGrowattStep1")
+            //modified hash : if first of pairs  is 0 then replace by c
+            var newpass= Qt.md5(passWord)
+            var newString =""
+            for(var x = 0;x < newpass.length ;x++){
+                if ((x%2 == 0) && newpass[x] === "0") {
+                    newString += "c"
+                }
+                else{
+                    newString += newpass[x]
+                }
+            }
+            var params = "account=" + encodeURIComponent(userName) + "&password=&validateCode=&isReadPact=0&passwordCrc=" + newString
+            console.log("*********SolarPanel  params  " + params)
+            var http = new XMLHttpRequest()
+            var url2 = "https://server.growatt.com/login"
+            console.log("*********SolarPanel  url2" +  url2)
+            http.open("POST", url2, true)
+            http.setRequestHeader("Host", "server.growatt.com");
+            http.setRequestHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+            http.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            http.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9");
+            http.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+            http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            http.setRequestHeader("Origin", "https://server.growatt.com");
+            http.setRequestHeader("Connection", "keep-alive");
+            http.setRequestHeader("Referer", "https://server.growatt.com/login");
+            http.onreadystatechange = function() { // Call a function when the state changes.
+                if (http.readyState === 4) {
+                    if (http.status === 200) {
+                        var JsonString = http.responseText
+                        if (debugOutput) console.log("*********SolarPanel JsonString " +  JsonString)
+                        var JsonObject= JSON.parse(JsonString)
+                        if (JsonObject.result ===1){
+                            getGrowattStep2()
+                        }else{
+                            parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                        }
+
+                    } else {
+                        if (debugOutput) console.log("*********SolarPanel  getGrowattStep2 http.status " +  http.status)
+                        currentPower = 0
+                        parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                    }
+                }
+            }
+            http.send(params);
+        }
+
+
+
+        function getGrowattStep2(){
+            if (debugOutput) console.log("*********SolarPanel Start getGrowattStep2")
+            var http = new XMLHttpRequest()
+            var url2 = "https://server.growatt.com/index/getPlantListTitle"
+            console.log("*********SolarPanel  url2" +  url2)
+            http.open("POST", url2, true)
+            http.setRequestHeader("Host", "server.growatt.com");
+            http.setRequestHeader("Origin", "https://server.growatt.com");
+            http.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+            http.setRequestHeader("Connection", "keep-alive");
+            http.setRequestHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+            http.setRequestHeader("Referer", "https://server.growatt.com/index");
+            http.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9");
+            http.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            http.onreadystatechange = function() { // Call a function when the state changes.
+                if (http.readyState === 4) {
+                    if (http.status === 200) {
+                        try {
+                            var JsonString = http.responseText
+                            if (debugOutput) console.log("*********SolarPanel JsonString " +  JsonString)
+                            var JsonObject= JSON.parse(JsonString)
+                            if (JsonObject[0].id){
+                                getGrowattStep3(JsonObject[0].id)
+                            }else{
+                                parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                            }
+                        }
+                        catch (e){
+                            currentPower = 0
+                            parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+                        }
+                    } else {
+                        if (debugOutput) console.log("*********SolarPanel  getGrowattStep3 http.status " +  http.status)
+                        parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                    }
+                }
+            }
+            http.send();
+        }
+
+
+
+        function getGrowattStep3(plantID){
+            if (debugOutput) console.log("*********SolarPanel Start getGrowattStep3")
+            var http = new XMLHttpRequest()
+            var params = "currPage=1&plantId=" + plantID
+            console.log("*********SolarPanel  params  " + params)
+            var url2 = "https://server.growatt.com/panel/getDevicesByPlantList"
+            console.log("*********SolarPanel  url2 " +  url2)
+            http.open("POST", url2, true)
+            http.setRequestHeader("Host", "server.growatt.com");
+            http.setRequestHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+            http.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            http.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9");
+            http.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+            http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            http.setRequestHeader("Origin", "https://server.growatt.com");
+            http.setRequestHeader("Connection", "keep-alive");
+            http.setRequestHeader("Referer", "https://server.growatt.com/index");
+            http.onreadystatechange = function() { // Call a function when the state changes.
+                if (http.readyState === 4) {
+                    if (http.status === 200) {
+                        try {
+                            var JsonString = http.responseText
+                            if (debugOutput) console.log("*********SolarPanel JsonString " +  JsonString)
+                            var JsonObject= JSON.parse(JsonString)
+                            if (parseInt(JsonObject.result) === 1){
+                                currentPower = 0
+                                var today2 =0
+                                totalValue = 0
+                                for(var x in JsonObject.obj.datas){
+                                    currentPower = parseInt(currentPower) + parseInt(JsonObject.obj.datas[x].pac)
+                                    if (debugOutput) console.log("currentPower: " + currentPower)
+                                    today2 = parseInt(today2 )+  parseInt((JsonObject.obj.datas[x].eToday)*1000)
+                                    if (debugOutput) console.log("today2: " + today2)
+                                    totalValue = parseInt(totalValue) +  parseInt((JsonObject.obj.datas[x].eTotal)*1000)
+                                    if (debugOutput) console.log("totalValue: " + totalValue)
+                                }
+                            }else{
+                                parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                            }
+                            parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+                        }
+                        catch (e){
+                            currentPower = 0
+                            parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                        }
+                    } else {
+                        if (debugOutput) console.log("*********SolarPanel  getGrowattStep3 http.status " +  http.status)
+                        parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+                    }
+                }
+            }
+            http.send(params);
+        }
