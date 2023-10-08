@@ -1,5 +1,5 @@
 /////////             <version>1.0.15</version>
-    /////////                     GROW1                        /////////////
+    /////////                     TEST1                        /////////////
     /////////  Plugin to extract Growatt Solar data for Toon  ///////////////
     /////////                   By Oepi-Loepi                  ///////////////
 
