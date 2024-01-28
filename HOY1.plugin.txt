@@ -1,94 +1,148 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     HOY1                    /////////////
 /////////  Plugin to extract Hoymiles Solar data for Toon ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
 
 
-function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-	if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-	var data = "{\"ERROR_BACK\":true,\"LOAD\":{\"loading\":true},\"body\":{\"password\":\"" + Qt.md5(passWord) + "\",\"user_name\":\"" + userName + "\"},\"WAITING_PROMISE\":true}";
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "https://global.hoymiles.com/platform/api/gateway/iam/auth_login");
-	xhr.setRequestHeader("Host", "global.hoymiles.com");
-	xhr.setRequestHeader("Connection", "keep-alive");
-	xhr.setRequestHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
-	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("sec-ch-ua-mobile", "?0");
-	xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
-	xhr.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
-	xhr.setRequestHeader("Origin", "https://global.hoymiles.com");
-	xhr.setRequestHeader("Sec-Fetch-Site", "same-origin");
-	xhr.setRequestHeader("Sec-Fetch-Mode", "cors");
-	xhr.setRequestHeader("Sec-Fetch-Dest", "empty");
-	xhr.setRequestHeader("Referer", "https://global.hoymiles.com/platform/login?form=logout&notice=1");
-	xhr.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
-	xhr.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
-	xhr.onreadystatechange = function() { // Call a function when the state changes.
-		if (xhr.readyState == XMLHttpRequest.DONE) {
-			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
-				try {
-					if (debugOutput) console.log(xhr.responseText)
-					var JsonString = xhr.responseText
-					var JsonObject= JSON.parse(JsonString)
-					var token = JsonObject.data.token
-					console.log("token : " + token)
-					getStep2(token,siteid)
-				} catch (e){
-					currentPower = 0
-					parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
+    function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+        if (debugOutput) console.log("*********SolarPanel Start getSolarData")
+		try {
+			//this in a try catch because the old versions of app do not have maxtries, cachedToken and cachedToken2
+			if (getDataCount == 0 && cachedToken !==""){
+				if (debugOutput) console.log("*********SolarPanel cachedToken : " + cachedToken)
+				if (debugOutput) console.log("*********SolarPanel New version of App get data")
+				getStep2(cachedToken,siteid)
+			}else if(getDataCount == 1 && cachedToken2 !==""){
+				if (debugOutput) console.log("*********SolarPanel cachedToken2 : " + cachedToken2)
+				if (debugOutput) console.log("*********SolarPanel New version of App get data")
+				getStep2(cachedToken2,siteid)
+			}else{
+				if (debugOutput) console.log("*********SolarPanel New version of App get token")
+				getNewToken(passWord,userName,apiKey,siteid,urlString,totalValue)
+			}
+		} catch (e){
+			if (debugOutput) console.log("*********SolarPanel Old version of App")
+			getNewToken(passWord,userName,apiKey,siteid,urlString,totalValue)
+		}
+    }
+	
+	
+	function getNewToken(passWordN,userNameN,apiKeyN,siteidN,urlStringN,totalValueN){
+		var data = "{\"ERROR_BACK\":true,\"LOAD\":{\"loading\":true},\"body\":{\"password\":\"" + Qt.md5(passWordN) + "\",\"user_name\":\"" + userNameN + "\"},\"WAITING_PROMISE\":true}";
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "https://global.hoymiles.com/platform/api/gateway/iam/auth_login");
+		xhr.setRequestHeader("Host", "global.hoymiles.com");
+		xhr.setRequestHeader("Connection", "keep-alive");
+		xhr.setRequestHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
+		xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+		xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xhr.setRequestHeader("sec-ch-ua-mobile", "?0");
+		xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
+		xhr.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
+		xhr.setRequestHeader("Origin", "https://global.hoymiles.com");
+		xhr.setRequestHeader("Sec-Fetch-Site", "same-origin");
+		xhr.setRequestHeader("Sec-Fetch-Mode", "cors");
+		xhr.setRequestHeader("Sec-Fetch-Dest", "empty");
+		xhr.setRequestHeader("Referer", "https://global.hoymiles.com/platform/login?form=logout&notice=1");xhr.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+		xhr.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
+		xhr.onreadystatechange = function() { 
+			if (xhr.readyState == XMLHttpRequest.DONE) {
+				if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
+					try {
+						console.log("*********SolarPanel responseText: "  + xhr.responseText)
+						var JsonString = xhr.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var token = JsonObject.data.token
+						if (debugOutput) console.log("*********SolarPanel new token : " + token)
+						getStep2(token,siteidN,passWordN,userNameN)
+					} catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
+					}
+				} else {
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
 				}
-			} else {
-				parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
 			}
 		}
+		xhr.send(data)
 	}
-	xhr.send(data);
-}
 
-function getStep2(token,siteid2){
-	if (debugOutput) console.log("*********SolarPanel Start getStep3")
-	var data = "{\"body\":{\"sid\":" + siteid2 + "},\"WAITING_PROMISE\":true}";
-	var xhr = new XMLHttpRequest();
-	xhr.withCredentials = true;
-	xhr.open("POST", "https://global.hoymiles.com/platform/api/gateway/pvm-data/data_count_station_real_data");
-	xhr.setRequestHeader("Host", "global.hoymiles.com");
-	xhr.setRequestHeader("token", token);
-	xhr.setRequestHeader("Connection", "keep-alive");
-	xhr.setRequestHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
-	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
-	xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-	xhr.setRequestHeader("sec-ch-ua-mobile", "?0");
-	xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
-	xhr.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
-	xhr.setRequestHeader("Origin", "https://global.hoymiles.com");
-	xhr.setRequestHeader("Sec-Fetch-Site", "same-origin");
-	xhr.setRequestHeader("Sec-Fetch-Mode", "cors");
-	xhr.setRequestHeader("Sec-Fetch-Dest", "empty");
-	xhr.setRequestHeader("Referer", "https://global.hoymiles.com/platform/station/view/detail?id=620570");
-	xhr.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
-	xhr.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
-	xhr.onreadystatechange = function() { // Call a function when the state changes.
-		if (xhr.readyState == XMLHttpRequest.DONE) {
-			if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
-				try {
-				   console.log(xhr.responseText)
-				   var JsonString = xhr.responseText
-				   var JsonObject= JSON.parse(JsonString)
-				   var today2	
-				   currentPower = parseInt(JsonObject.data.real_power)
-				   today2 = parseInt(JsonObject.data.today_eq)
-				   totalValue =  parseInt(JsonObject.data.total_eq)
-				   parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
-				}
-				catch (e){
-					currentPower = 0
-					parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
-				}
-			} else {
-				parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
-			}
-		}
-	}
-	xhr.send(data);
-}
+    function getStep2(token,siteid2,passWord2,userName2){
+        if (debugOutput) console.log("*********SolarPanel Start getStep2")
+        var data = "{\"body\":{\"sid\":" + siteid2 + "},\"WAITING_PROMISE\":true}";
+        var xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.open("POST", "https://global.hoymiles.com/platform/api/gateway/pvm-data/data_count_station_real_data");
+        xhr.setRequestHeader("Host", "global.hoymiles.com");
+        xhr.setRequestHeader("token", token);
+        xhr.setRequestHeader("Connection", "keep-alive");
+        xhr.setRequestHeader("sec-ch-ua", "\"Google Chrome\";v=\"105\", \"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"105\"");
+        xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader("sec-ch-ua-mobile", "?0");
+        xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36");
+        xhr.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
+        xhr.setRequestHeader("Origin", "https://global.hoymiles.com");
+        xhr.setRequestHeader("Sec-Fetch-Site", "same-origin");
+        xhr.setRequestHeader("Sec-Fetch-Mode", "cors");
+        xhr.setRequestHeader("Sec-Fetch-Dest", "empty");
+        xhr.setRequestHeader("Referer", "https://global.hoymiles.com/platform/station/view/detail?id=620570");
+        xhr.setRequestHeader("Accept-Encoding", "gzip, deflate, br");
+        xhr.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
+        xhr.onreadystatechange = function() { 
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
+                    try {
+                        if (debugOutput) console.log("*********SolarPanel responseText: "  + xhr.responseText)
+                        var JsonString = xhr.responseText
+                        var JsonObject= JSON.parse(JsonString)
+						try {
+							//this in a try catch because the old versions of app do not have maxtries, cachedToken and cachedToken2
+							if (JsonObject.message.indexOf("error")>-1 && maxtries < 2){
+								if (getDataCount == 0){
+									cachedToken = ""
+								}
+								if (getDataCount == 1){
+									cachedToken2 = ""
+								}
+								maxtries++
+								getSolarData(passWord2,userName2,"",siteid2,"",totalValue)
+							}
+							if (JsonObject.message.indexOf("succes")>-1){
+								maxtries = 0
+								if (getDataCount == 0){
+									cachedToken = token
+								}
+								if (getDataCount == 1){
+									cachedToken2 = token
+								}
+							}
+						}catch (e){
+						}
+                        var today2
+                        currentPower = parseInt(JsonObject.data.real_power)
+                        today2 = parseInt(JsonObject.data.today_eq)
+                        totalValue =  parseInt(JsonObject.data.total_eq)
+                        parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
+                    }
+                    catch (e){
+                        if (debugOutput) console.log("*********SolarPanel error xhr.status : " + xhr.status)
+                        if (debugOutput) console.log("*********SolarPanel error responseText: "  + xhr.responseText)
+                        currentPower = 0
+                        parseReturnData(0,totalValue,todayValue,0,0,0,0, xhr.status,"error")
+                    }
+                } else {
+                    if (xhr.responseText.indexOf("token")>-1 && xhr.responseText.indexOf("error")>-1){
+                        cachedToken = ""
+                        if (debugOutput) console.log("*********SolarPanel token error xhr.status : " + xhr.status)
+                        getSolarData(passWord2,userName2,"",siteid2,"",totalValue)
+                    }
+                    if (debugOutput) console.log("*********SolarPanel error xhr.status : " + xhr.status)
+                    if (debugOutput) console.log("*********SolarPanel error responseText: "  + xhr.responseText)
+                    parseReturnData(currentPower,totalValue,0,0,0,0,0, xhr.status,"error")
+                }
+            }
+        }
+        xhr.send(data);
+    }
+
