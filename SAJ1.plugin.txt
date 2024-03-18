@@ -1,4 +1,4 @@
-/////////             <version>1.0.1</version>
+/////////             <version>1.0.2</version>
 /////////                     SAJ1                        /////////////
 /////////  Plugin to extract SAJ Solar data for Toon    ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -12,7 +12,7 @@
 				if (http.status === 200 || http.status === 300  || http.status === 302) {
 					try {
 						var response = http.responseText
-						var n201 = response.indexOf("<pac1>") + "<pac1>".length
+						var n201 = response.indexOf("<p-ac>") + "<p-ac>".length
 						var n202 = response.indexOf("<", n201)
 						currentPower = response.substring(n201, n202);
 						
