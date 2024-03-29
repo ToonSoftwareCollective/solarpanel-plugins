@@ -1,4 +1,4 @@
-/////////             <version>1.0.2</version>
+/////////             <version>1.0.3</version>
 /////////                     SAJ1                        /////////////
 /////////  Plugin to extract SAJ Solar data for Toon    ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -33,7 +33,7 @@
 					}
 				} else {
 					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-					parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
 				}
 			}
 		}
