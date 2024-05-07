@@ -1,4 +1,4 @@
-/////////             <version>1.0.0</version>
+/////////             <version>1.0.1</version>
 /////////                     SOLISCLOUD1                  /////////////
 /////////  Plugin to extract SolisCloud Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -73,52 +73,76 @@
         encryptedBody = base64( hexStr2bin(encryptedBody) )
         var encryptedBodyEncoded = encodeURI(encryptedBody)
 
-        var xhr = new XMLHttpRequest()
-        var url = "https://codedev.tools/CryptoSecurity/GetHmacGenerator?text=POST%0A" + encryptedBodyEncoded + "%0Aapplication%2Fjson%0A" + newDate + "%0A%2Fv1%2Fapi%2FuserStationList&algorithm=SHA1&secretKey=" + keySecret
-        
 		var onetime = true
-		xhr.open("GET", url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200 || xhr.status === 300  || xhr.status === 302) {
-						if (debugOutput) console.log("xhr.status: " + xhr.status)
-						if (debugOutput) console.log("xhr.responseText: " + xhr.responseText)
-						var JsonObject= JSON.parse(xhr.responseText)
-						var encryptedHex = JsonObject.encryptedText
-						var encrypterdBase64 = base64( hexStr2bin(encryptedHex))
-						var auth =  "API " + keyId + ":" + encrypterdBase64
-						var body = "{\"pageNo\":1,\"pageSize\":10}"
+		var hmackey = keySecret
 
-						if (debugOutput) console.log("---------------------------------------------------------------")
-						if (debugOutput) console.log("Content-MD5: " + encryptedBody)
-						if (debugOutput) console.log("Content-Type: application/json")
-						if (debugOutput) console.log("Date: " + newDate)
-						if (debugOutput) console.log("Authorization: " + auth)
-						if (debugOutput) console.log("Port： " + port)
-						
-						var doc2 = new XMLHttpRequest();
-						doc2.open("PUT", "file:///tmp/solis.txt");
-						doc2.send(newDate + ";" + auth + ";" + port);
+		if (debugOutput) console.log("*********SolarPanel ---------------------------------------------------------------")
+		if (debugOutput) console.log("*********SolarPanel DateValue: " + newDate)
+		
+		var doc2 = new XMLHttpRequest();
+		doc2.open("PUT", "file:///tmp/hmac.txt");
+		doc2.send(hmackey + ";" + newDate);
 
-						var doc4 = new XMLHttpRequest();
-						doc4.open("PUT", "file:///tmp/tsc.command");
-						doc4.send("external-solarPanel");
+		var doc4 = new XMLHttpRequest();
+		doc4.open("PUT", "file:///tmp/tsc.command");
+		doc4.send("external-solarPanel");
 
-						//wacht op een response vanuit het TSC script
-						solarEnphaseDelay(8000, function() {
-							if (onetime){
-								onetime = false
-								parseSolisJson(totalValue)
-							}
-						})
+		//wacht op een response vanuit het TSC script
+		solarEnphaseDelay(8000, function() {
+			if (onetime){
+				onetime = false
+				getHmac(totalValue, newDate, port, keyId)
+			}
+		})
+    }
+	
+	
+	function getHmac(totalValue, newDate, port, keyId){
+		if (debugOutput) console.log("*********SolarPanel Start getHmac")
+		var http = new XMLHttpRequest()
+        var url = "file:///tmp/hmac_output.txt"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("GET", url, true);
+        http.onreadystatechange = function() { // Call a function when the state changes.
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+					if (debugOutput) console.log("http.status: " + http.status)
+					if (debugOutput) console.log(http.responseText)
+					var base64hmac = base64( hexStr2bin(http.responseText) )
+					if (debugOutput) console.log("*********SolarPanel base64hmac: " + base64hmac)
+
+					var auth =  "API " + keyId + ":" + base64hmac
+					
+					var doc2 = new XMLHttpRequest();
+					doc2.open("PUT", "file:///tmp/solis.txt");
+					doc2.send(newDate + ";" + auth + ";" + port);
+
+					var doc4 = new XMLHttpRequest();
+					doc4.open("PUT", "file:///tmp/tsc.command");
+					doc4.send("external-solarPanel");
+
+					//wacht op een response vanuit het TSC script
+					var onetime = true
+					solarEnphaseDelay(8000, function() {
+						if (onetime){
+							onetime = false
+							parseSolisJson(totalValue)
+						}
+					})
+                } else {
+					if (http.status === 401){
+						if (getDataCount == 0){apiKey = ""}
+                        if (getDataCount == 1){apiKey2 = ""}
 					}
+                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
                 }
             }
-        xhr.send();
+        }
+       http.send();
     }
 	
 	function parseSolisJson(totalValue){
-         if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
+        if (debugOutput) console.log("*********SolarPanel Start parseSolisJson")
         var http = new XMLHttpRequest()
         var url = "file:///tmp/solis_output.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
