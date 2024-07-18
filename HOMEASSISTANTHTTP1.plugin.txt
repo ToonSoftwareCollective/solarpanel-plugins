@@ -1,0 +1,34 @@
+/////////                <version>1.0.0</version>                /////////
+/////////                     HOMEASSISTANTHTTP                  /////////
+/////////  Plugin to extract Home Assistant Solar data for Toon  /////////
+/////////                        By oepi-loepi                   /////////
+
+
+function getSolarData(password, username, apiKey, siteId, urlString, totalPower) {
+    if (debugOutput) console.log("*********SolarPanel Start getHomeAssistantData")
+    var url = "http://" + urlString + "/api/states/sensor.solar_panel"
+    var http = new XMLHttpRequest();
+    if (debugOutput) console.log("*********SolarPanel HA url " + url) 
+    http.open("GET", url, true)
+    http.setRequestHeader("Authorization", "Bearer " + apiKey);
+    http.onreadystatechange = function() {
+        if (http.readyState == XMLHttpRequest.DONE) {
+            if (http.status === 200 || http.status === 300 || http.status === 302) {
+                try {
+                    var sensorResult = http.responseText
+                    var sensorObject = JSON.parse(sensorResult)
+                    var currentPower = parseInt(sensorObject.attributes.current)
+                    var todayPower = parseInt(sensorObject.attributes.today)
+                    var totalPower = parseFloat(sensorObject.attributes.total)
+                    parseReturnData(currentPower, totalPower, todayPower, 0, 0, 0, 0, http.status, "succes")
+                } catch (e) {
+                    parseReturnData(0, totalPower, 0, 0, 0, 0, 0, http.status, "error")
+                }
+            } else {
+                if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+                parseReturnData(0, totalPower, 0, 0, 0, 0, 0, http.status, "error")
+            }
+        }
+    }
+    http.send();
+}
