@@ -1,0 +1,34 @@
+/////////             <version>1.0.0</version>
+/////////                     OPENDTU1                     /////////////
+/////////  Plugin to extract openDTU data for Toon         ///////////////
+/////////                   By Oepi-Loepi                  ///////////////
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		if (debugOutput) console.log("*********SolarPanel Start getopenDTUData")
+		var http = new XMLHttpRequest();
+		http.open("GET", "http://" + urlString + "/api/livedata/status", true)
+		http.onreadystatechange = function() {
+			if (http.readyState == XMLHttpRequest.DONE) {
+				if (http.status === 200 || http.status === 300  || http.status === 302) {
+					try {
+						var JsonString = http.responseText
+						var JsonObject= JSON.parse(JsonString)
+						var today2
+						currentPower = parseInt(JsonObject.total.Power.v)
+						totalValue= parseInt(JsonObject.total.YieldTotal.v * 1000)
+						today2 = parseInt(JsonObject.total.YieldDay.v)
+						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
+					}
+					catch (e){
+						currentPower = 0
+						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+					}
+				} else {
+					if (debugOutput) console.log("*********SolarPanel error: " + http.status)
+					parseReturnData(currentPower,totalValue,0,0,0,0,0, http.status,"error")
+				}
+			}
+		}
+		http.send();
+	}
+	
