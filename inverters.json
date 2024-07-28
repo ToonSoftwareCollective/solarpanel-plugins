@@ -21,6 +21,7 @@
 			{"friendlyName":"Kostal Piko", "filename":"KOSTAL1", "data": ["URL"], "info":"Plugin voor Kostal omvormers. (lokaal)"},
 			{"friendlyName":"Omnik", "filename":"OMNIK1", "data": ["Username","Password"], "info":"Deze plugin maakt gebruik van het Omnik Portal. Soms gaat het portal de fout in met de dagwaarden."},
 			{"friendlyName":"Omnik lokaal", "filename":"OMNIK2", "data": ["URL"], "info":"Deze Plugin maakt lokaal verbinding met de omvormer. Probeer vooraf of het voor je omvormer werkt: http://xxx.xxx.x.xxx/js/status.js"},
+			{"friendlyName":"openDTU", "filename":"OPENDTU1", "data": ["URL"], "info":"Deze Plugin maakt lokaal verbinding met de omvormer. Probeer vooraf of het voor je omvormer werkt: http://xxx.xxx.x.xxx/api/livedata/status"},
 			{"friendlyName":"PVOutput", "filename":"PVOUTPUT1", "data": ["SiteID", "APIKey"], "info":""},
 			{"friendlyName":"SAJ Solar (local)", "filename":"SAJ1", "data":  ["URL"], "info":"Deze Plugin maakt lokaal verbinding met de omvormer. Probeer vooraf of het voor je omvormer werkt: http://xxx.xxx.x.xxx/real_time_data.xml"},
 			{"friendlyName":"SAJ Solar (web)", "filename":"SAJ2", "data":   ["Username","Password"], "info":"Deze Plugin haalt data vanaf https://fop.saj-electric.com/ geef naam en wachtwoord."},
