@@ -1,5 +1,5 @@
 /////////                <version>1.0.0</version>                /////////
-/////////                     HOMEASSISTANTHTTP                  /////////
+/////////                     HOMEASSISTANTHTTP1                  /////////
 /////////  Plugin to extract Home Assistant Solar data for Toon  /////////
 /////////                        By oepi-loepi                   /////////
 
