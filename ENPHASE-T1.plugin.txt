@@ -6,7 +6,6 @@
 	function getSolarData(passWord,userName,sessionID,siteid,urlString,totalValue){
 		var sessionID = apiKey
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-		if (debugOutput) console.log("*********SolarPanel getSolarData siteid: " + siteid)
 		getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
     }
 
@@ -211,11 +210,10 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
    function getTokenD8(tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid){
         if (debugOutput) console.log("*********SolarPanel Start getTokenD8")
 		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteid: " + siteid)	
-		var siteName = siteid.split(":")[0]
-		var siteSerial = siteid.split(":")[1]
+		var siteName = siteid
 		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteName: " + siteName)
-		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteSerial: " + siteSerial)
-		var data = "Site=" + siteName + "&serialNum=" + siteSerial;
+		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteSerial: " + envoyserial)
+		var data = "Site=" + siteName + "&serialNum=" + envoyserial;
         var http = new XMLHttpRequest()
         var url = "https://entrez.enphaseenergy.com/entrez_tokens"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
