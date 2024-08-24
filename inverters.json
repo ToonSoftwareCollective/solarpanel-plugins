@@ -6,7 +6,7 @@
 			{"friendlyName":"Domoticz (2023.2>)", "filename":"DOM-DOUBLE2", "data": ["IDX","URL"], "info":"Plugin voor Domoticz (2023.2>). Voor enkele omvormer, geef 1 IDX, voor een dubbele omvormer geef 2 IDX als bijvoorbeeld 12+19. Geef ip incl Port als 192.168.2.86:8084"},
 			{"friendlyName":"Enphase 1", "filename":"ENPHASE1", "data": ["URL"], "info":"Plugin voor Enphase omvormers. (lokaal)"},
 			{"friendlyName":"Enphase D7", "filename":"ENPHASE1-D7", "data": ["Username", "Password"], "info":"Geef de naam en wachtwoord van de https://enlighten.enphaseenergy.com site"},
-	                {"friendlyName":"Enphase T", "filename":"ENPHASE-T1", "data": ["Username", "Password","URL","SiteID"], "info":"Geef de naam en wachtwoord van de https://enlighten.enphaseenergy.com site en de URL van jouw envoy, geef bij SiteID de naam van je installatie:serienummer"},
+	                {"friendlyName":"Enphase T", "filename":"ENPHASE-T1", "data": ["Username", "Password","URL","SiteID"], "info":"Geef de naam en wachtwoord van de https://enlighten.enphaseenergy.com site en de URL van jouw envoy, geef bij SiteID de naam van je installatie"},
 	                {"friendlyName":"FoxCloud", "filename":"FOX1", "data": ["Username","Password"], "info":"Plugin voor Foxcloud. Werkt via het webportal dus login voor de webinterface nodig"},
 			{"friendlyName":"Fronius", "filename":"FRONIUS1", "data": ["URL"], "info":"Plugin voor Fronius omvormers. (lokaal)"},
 			{"friendlyName":"FP4ALL", "filename":"FP4ALL", "data": ["URL"], "info":"Plugin voor FP4ALL dataloggers. (lokaal)"},
