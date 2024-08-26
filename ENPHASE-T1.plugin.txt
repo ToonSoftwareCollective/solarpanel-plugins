@@ -162,7 +162,7 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, totalValue,siteid){
     if (debugOutput) console.log("*********SolarPanel Start startLoginD8")
     var http = new XMLHttpRequest()
-	var data = "codeChallenge=&redirectUri=&client=&clientId=&authFlow=entrezSession&serialNum=&grantType=&state=&invalidSerialNum=&username=mvdroest%40gmail.com&password=Wf9%3F%25QtEmxuV%40i-";
+	var data = "codeChallenge=&redirectUri=&client=&clientId=&authFlow=entrezSession&serialNum=&grantType=&state=&invalidSerialNum=&username=" + userName + "&password=" + passWord;
 	var url = "https://entrez.enphaseenergy.com/login"
     if (debugOutput) console.log("*********SolarPanel url: " + url)
     http.open("POST", url, true);
