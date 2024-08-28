@@ -1,4 +1,4 @@
-/////////             <version>1.1.1</version>
+/////////             <version>1.1.2</version>
 /////////                     ENPHASE-T1                        /////////////
 /////////  Plugin to extract Enphase Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  /////////////
@@ -378,7 +378,7 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 							if (getDataCount == 1){apiKey2 = ""}
 						}else{
 							if(invtype == "D7"){
-								if (debugOutput) console.log("*********SolarPanel parsing D7 http.responseText: ")
+								if (debugOutput) console.log("*********SolarPanel parsing D7 responseText")
 								var JsonObject= JSON.parse(http.responseText)
 								var today2
 								currentPower = parseInt(JsonObject.production[0].wNow)
@@ -390,7 +390,13 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 								parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
 							}
 							if(invtype == "D8"){
-								if (debugOutput) console.log("*********SolarPanel parsing D8 http.responseText: ")
+								if (debugOutput) console.log("*********SolarPanel yesterdayTotal: " + yesterdayTotal)
+								if (yesterdayTotal == 0||yesterdayTotal == null){
+									if (debugOutput) console.log("*********SolarPanel yesterdayTotal is 0")
+									getLastNonNullValueFromURL()
+									if (debugOutput) console.log("*********SolarPanel return yesterdayTotal: " + yesterdayTotal)
+								}
+								if (debugOutput) console.log("*********SolarPanel parsing D8 responseText")
 								var JsonObject= JSON.parse(http.responseText)
 								var today2
 								currentPower = parseInt(JsonObject.production[0].wNow)
@@ -453,4 +459,35 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
         }
        http.send();
     }
-    
+   
+function getLastNonNullValueFromURL() {
+	if (debugOutput) console.log("*********SolarPanel getLastNonNullValueFromURL")
+	var $date = new Date()
+	$date.setDate($date.getDate()-1)
+	var yesterdayDate =  $date.getDate() + '-' + ($date.getMonth()+1) + '-' + $date.getFullYear()
+	var url = "http://localhost/hcb_rrd?action=getRrdData&loggerName=elec_solar_quantity&rra=10yrdays&readableTime=1&nullForNaN=1&to=" + yesterdayDate;
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', url, true)
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const data = JSON.parse(xhr.responseText)
+                const keys = Object.keys(data).reverse()
+                let lastNonNullValue = null
+                for (var key in keys) {
+                    if (data[key] !== null) {
+                        lastNonNullValue = data[key]
+                        yesterdayTotal =  lastNonNullValue
+                    }
+                }
+               if (debugOutput) console.log("*********SolarPanel yesterdayTotal: " + yesterdayTotal)
+			   return yesterdayTotal
+            } catch (error) {
+                if (debugOutput) console.error("*********SolarPanel getLastNonNullValueFromURL error: ", error)
+            }
+        } else if (xhr.readyState === 4) {
+             if (debugOutput) console.error("*********SolarPanel getLastNonNullValueFromURL error: ", xhr.status)
+        }
+    }
+    xhr.send();
+}
