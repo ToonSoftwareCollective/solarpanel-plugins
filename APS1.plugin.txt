@@ -1,4 +1,4 @@
-/////////             <version>1.0.4</version>
+/////////             <version>1.0.5</version>
 /////////                     APS1                     /////////////
 /////////  Plugin to extract APS data for Toon         ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
@@ -7,7 +7,7 @@
 		if (debugOutput) console.log("*********SolarPanel Start  getAPSData")
 		userName = encodeURIComponent(userName)
         passWord = encodeURIComponent(passWord)
-        var url = "https://apsystemsema.com:443/ema/loginEMA.action?username=" + userName + "&password="+ passWord
+        var url = "https://apsystemsema.com:443/ema/loginEMA.action?username=" + encodeURIComponent(userName) + "&password="+ encodeURIComponent(passWord)
         var http = new XMLHttpRequest() 
         http.open("POST", url, true);
         http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
