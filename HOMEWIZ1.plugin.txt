@@ -14,7 +14,7 @@
 						var JsonString = http.responseText
 						var JsonObject= JSON.parse(JsonString)
 						var today2
-						currentPower = parseInt(JsonObject.active_power_w)
+						currentPower = -1*parseInt(JsonObject.active_power_w)
 						totalValue= (parseInt(JsonObject.total_power_export_t1_kwh)*1000) - (parseInt(JsonObject.total_power_import_t1_kwh)*1000)
 						today2 = totalValue - yesterdayTotal
 						parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
