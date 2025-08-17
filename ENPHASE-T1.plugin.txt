@@ -1,5 +1,5 @@
 /////////             <version>1.2.1</version>
-/////////                     ENPHASE-T2                        /////////////
+/////////                     ENPHASE-T1                        /////////////
 /////////  Plugin to extract Enphase Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  /////////////
 
