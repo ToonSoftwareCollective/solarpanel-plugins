@@ -6,10 +6,11 @@
 	function getSolarData(passWord,userName,sessionID,siteid,urlString,totalValue){
 		var sessionID = apiKey
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-		getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
+		//getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
 		parseEnpaseInfo(urlString,passWord,userName,sessionID, totalValue,siteid);
     }
 
+/*
 	function getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid){
 		var onetime = true
 		if (debugOutput) console.log("*********SolarPanel Start getEnphaseStep1()")
@@ -32,13 +33,13 @@
 			}
 		})
 	}
-
+*/
 
 function parseEnpaseInfo(urlString,passWord,userName,sessionID,totalValue,siteid){
     if (debugOutput) console.log("*********SolarPanel parsing Info data after TSC command")
     var http = new XMLHttpRequest()
     //var url = "file:///tmp/enphase_info_return.txt"
-	var url = "http://94.209.69.183:6123/info.xml"
+	var url = "http://" + urlString + "/info.xml"
     http.open("GET", url, true);
     http.onreadystatechange = function() {
         if (debugOutput) console.log("http.readyState: " +http.readyState)
