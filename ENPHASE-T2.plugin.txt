@@ -1,4 +1,4 @@
-/////////             <version>1.2.0</version>
+/////////             <version>1.2.1</version>
 /////////                     ENPHASE-T2                        /////////////
 /////////  Plugin to extract Enphase Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  /////////////
@@ -7,6 +7,7 @@
 		var sessionID = apiKey
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
 		getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
+		parseEnpaseInfo(urlString,passWord,userName,sessionID, totalValue,siteid);
     }
 
 	function getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid){
@@ -36,7 +37,8 @@
 function parseEnpaseInfo(urlString,passWord,userName,sessionID,totalValue,siteid){
     if (debugOutput) console.log("*********SolarPanel parsing Info data after TSC command")
     var http = new XMLHttpRequest()
-    var url = "file:///tmp/enphase_info_return.txt"
+    //var url = "file:///tmp/enphase_info_return.txt"
+	var url = "http://94.209.69.183:6123/info.xml"
     http.open("GET", url, true);
     http.onreadystatechange = function() {
         if (debugOutput) console.log("http.readyState: " +http.readyState)
@@ -175,7 +177,7 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 						if (debugOutput) console.log("*********SolarPanel Start startLoginD8 http.responseText: " + http.responseText)
                         var csrf= http.responseText.split("<input type=\"hidden\" name=\"_csrf\" value=\"")[1].split("\"/>")[0].trim()
                         if (debugOutput) console.log("*********SolarPanel csrf: " + csrf)
-                        startLoginD8-2(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,csrf)
+                        startLoginD82(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,csrf)
                     }
                     catch (e){
                         currentPower = 0
@@ -190,8 +192,8 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
     }
 
 
-    function startLoginD8-2(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid, csrf){
-        if (debugOutput) console.log("*********SolarPanel Start startLoginD8-2")
+    function startLoginD82(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid, csrf){
+        if (debugOutput) console.log("*********SolarPanel Start startLoginD82")
         var data = "_csrf=" + csrf + "&username=" + encodeURIComponent(userName) + "&password=" + encodeURIComponent(passWord) + "&codeChallenge=&redirectUri=&client=&clientId=&authFlow=entrezSession&serialNum=&grantType=&state=&invalidSerialNum=";
         var http = new XMLHttpRequest()
         var url = "https://entrez.enphaseenergy.com/login"
@@ -241,10 +243,11 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
                     try {
                         if (debugOutput) console.log("*********SolarPanel getTokenD8 http.status: " + http.status)
 						if (debugOutput) console.log("*********SolarPanel getTokenD8 http.responseText: " + http.responseText)
-                        var newtoken== http.responseText.split("<textarea name=\"accessToken\" id=\"JWTToken\" cols=\"30\" rows=\"10\" >")[1].split("</textarea>")[0].trim()
+                        var newtoken= http.responseText.split("<textarea name=\"accessToken\" id=\"JWTToken\" cols=\"30\" rows=\"10\" >")[1].split("</textarea>")[0].trim()
                         if (debugOutput) console.log("*********SolarPanel newtokenD8:: " + newtoken)
                         if (newtoken !== ""){
-                           checkToken(tempSession, urlString,newtoken,totalValue,"D8")
+						   if (debugOutput) console.log("*********SolarPanel checking token: " + newtoken)
+                           checkToken(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,newtoken, "D8")
                         }else{
                             if (getDataCount == 0){apiKey = ""}
                             if (getDataCount == 1){apiKey2 = ""}
@@ -263,16 +266,18 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
     }
 
 
-    function checkToken(tempSession,urlString,apiKeyPlugin,totalValue,invtype){
-		var onetime = true
+    function checkToken(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,newtoken,invtype){
+		console.log("*********SolarPanel Start checkToken()*******************************************************************************")
         if (debugOutput) console.log("*********SolarPanel Start checkToken()")
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel enphase checktoken url " + urlString)
-		if (debugOutput) console.log("*********SolarPanel enphase checktoken apiKeyPlugin " + apiKeyPlugin)
+		if (debugOutput) console.log("*********SolarPanel enphase checktoken newtoken " + newtoken)
+			
+		var onetime = true
 		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/enphase_token.txt");
-		doc2.send(urlString + ";" + apiKeyPlugin);
+		doc2.send(urlString + ";" + newtoken);
 
 		var doc4 = new XMLHttpRequest();
 		doc4.open("PUT", "file:///tmp/tsc.command");
@@ -282,14 +287,14 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
 				onetime = false
-				parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue,invtype)
+				parseEnpaseToken(urlString,passWord,userName,newtoken,totalValue,invtype)
 			}
 		})
 	}
 		
-	function parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue,invtype){
+	function parseEnpaseToken(urlString,passWord,userName,newtoken,totalValue,invtype){
 		if (debugOutput) console.log("*********SolarPanel Start parseEnpaseToken()")
-		if (debugOutput) console.log("*********SolarPanel apiKeyPlugin: " + apiKeyPlugin)
+		if (debugOutput) console.log("*********SolarPanel newtoken: " + newtoken)
         var http = new XMLHttpRequest()
         var url = "file:///tmp/enphase_token_return.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
