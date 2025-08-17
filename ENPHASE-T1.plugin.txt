@@ -1,14 +1,16 @@
-/////////             <version>1.1.2</version>
-/////////                     ENPHASE-T1                        /////////////
+/////////             <version>1.2.1</version>
+/////////                     ENPHASE-T2                        /////////////
 /////////  Plugin to extract Enphase Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  /////////////
 
 	function getSolarData(passWord,userName,sessionID,siteid,urlString,totalValue){
 		var sessionID = apiKey
 		if (debugOutput) console.log("*********SolarPanel Start getSolarData")
-		getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
+		//getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid);
+		parseEnpaseInfo(urlString,passWord,userName,sessionID, totalValue,siteid);
     }
 
+/*
 	function getEnphaseStep1(urlString,passWord,userName,sessionID, totalValue,siteid){
 		var onetime = true
 		if (debugOutput) console.log("*********SolarPanel Start getEnphaseStep1()")
@@ -31,12 +33,13 @@
 			}
 		})
 	}
-
+*/
 
 function parseEnpaseInfo(urlString,passWord,userName,sessionID,totalValue,siteid){
     if (debugOutput) console.log("*********SolarPanel parsing Info data after TSC command")
     var http = new XMLHttpRequest()
-    var url = "file:///tmp/enphase_info_return.txt"
+    //var url = "file:///tmp/enphase_info_return.txt"
+	var url = "http://" + urlString + "/info.xml"
     http.open("GET", url, true);
     http.onreadystatechange = function() {
         if (debugOutput) console.log("http.readyState: " +http.readyState)
@@ -159,99 +162,93 @@ function startLoginD7(passWord,userName,urlString,envoyserial,envoyfirmware, tot
        http.send(JSON.stringify({ "session_id":  tempSession  , "serial_num": envoyserial , "username" : userName}));
     }
 
-function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, totalValue,siteid){
-    if (debugOutput) console.log("*********SolarPanel Start startLoginD8")
-    var http = new XMLHttpRequest()
-	var data = "codeChallenge=&redirectUri=&client=&clientId=&authFlow=entrezSession&serialNum=&grantType=&state=&invalidSerialNum=&username=" + encodeURIComponent(userName) + "&password=" + encodeURIComponent(passWord);
-	if (debugOutput) console.log("*********SolarPanel data: " + data)
-	
-	var url = "https://entrez.enphaseenergy.com/login"
-    if (debugOutput) console.log("*********SolarPanel url: " + url)
-	
-    http.open("POST", url, true);
-	http.setRequestHeader("Host", "entrez.enphaseenergy.com");
-	http.setRequestHeader("Connection", "keep-alive");
-	http.setRequestHeader("Cache-Control", "max-age=0");
-	http.setRequestHeader("sec-ch-ua", "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"");
-	http.setRequestHeader("sec-ch-ua-mobile", "?0");
-	http.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
-	http.setRequestHeader("Upgrade-Insecure-Requests", "1");
-	http.setRequestHeader("Origin", "https://entrez.enphaseenergy.com");
-	http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	http.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
-	http.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-	http.setRequestHeader("Sec-Fetch-Site", "same-origin");
-	http.setRequestHeader("Sec-Fetch-Mode", "navigate");
-	http.setRequestHeader("Sec-Fetch-User", "?1");
-	http.setRequestHeader("Sec-Fetch-Dest", "document");
-	http.setRequestHeader("Referer", "https://entrez.enphaseenergy.com/login");
-	http.setRequestHeader("Accept-Encoding", "gzip, deflate, br, zstd");
-	http.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if (debugOutput) console.log("http.readyState: " +http.readyState)
-        if (http.readyState === XMLHttpRequest.DONE) {
-            if (debugOutput) console.log("http.status: " + http.status)
-            if (http.status === 200 || http.status === 300  || http.status === 302) {
-                try {
-                    if (debugOutput) console.log("*********SolarPanel Start startLoginD8 http.status: " + http.status)
-                    if (debugOutput) console.log("*********SolarPanel Start startLoginD8 http.responseText: " + http.responseText)
-					var tempSession =  ""
-                    getTokenD8(tempSession,passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid)
-                }
-                catch (e){
-                    currentPower = 0
+
+
+	function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid){
+        if (debugOutput) console.log("*********SolarPanel Start startLoginD8")
+        var http = new XMLHttpRequest()
+        var url = "https://entrez.enphaseenergy.com/login_main_page"
+        http.open("GET", url, true);
+        http.setRequestHeader("Connection", "keep-alive")
+        http.onreadystatechange = function() {
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("*********SolarPanel Start startLoginD8 http.status: " + http.status)
+						if (debugOutput) console.log("*********SolarPanel Start startLoginD8 http.responseText: " + http.responseText)
+                        var csrf= http.responseText.split("<input type=\"hidden\" name=\"_csrf\" value=\"")[1].split("\"/>")[0].trim()
+                        if (debugOutput) console.log("*********SolarPanel csrf: " + csrf)
+                        startLoginD82(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,csrf)
+                    }
+                    catch (e){
+                        currentPower = 0
+						parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
                 }
-            } else {
-                parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
             }
         }
+        http.send();
     }
-    http.send(data);
-}
 
-   function getTokenD8(tempSession, passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid){
+
+    function startLoginD82(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid, csrf){
+        if (debugOutput) console.log("*********SolarPanel Start startLoginD82")
+        var data = "_csrf=" + csrf + "&username=" + encodeURIComponent(userName) + "&password=" + encodeURIComponent(passWord) + "&codeChallenge=&redirectUri=&client=&clientId=&authFlow=entrezSession&serialNum=&grantType=&state=&invalidSerialNum=";
+        var http = new XMLHttpRequest()
+        var url = "https://entrez.enphaseenergy.com/login"
+        if (debugOutput) console.log("*********SolarPanel url: " + url)
+        http.open("POST", url, true);
+        http.setRequestHeader("content-type", "application/x-www-form-urlencoded")
+        http.onreadystatechange = function() {
+            if (http.readyState === XMLHttpRequest.DONE) {
+                if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
+                if (http.status === 200 || http.status === 300  || http.status === 302) {
+                    try {
+                        if (debugOutput) console.log("*********SolarPanel Start startLoginD8-2 http.status: " + http.status)
+						if (debugOutput) console.log("*********SolarPanel Start startLoginD8-2 http.responseText: " + http.responseText)
+                        var csrf2= http.responseText.split("<input type=\"hidden\" name=\"_csrf\" value=\"")[1].split("\"/>")[0].trim()
+                        if (debugOutput) console.log("*********SolarPanel csrf2: " + csrf2)
+                        getTokenD8(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,csrf2)
+                    }
+                    catch (e){
+                        currentPower = 0
+                        parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    }
+                } else {
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                }
+            }
+        }
+        http.send(data);
+    }
+	
+	
+
+    function getTokenD8(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,csrf){
         if (debugOutput) console.log("*********SolarPanel Start getTokenD8")
-		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteid: " + siteid)	
 		var siteName = siteid
 		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteName: " + siteName)
 		if (debugOutput) console.log("*********SolarPanel getTokenD8 siteSerial: " + envoyserial)
-		var data = "Site=" + siteName + "&serialNum=" + envoyserial;
+        var data = "_csrf=" + csrf + "&Site=" + siteName + "&serialNum=" + envoyserial;
         var http = new XMLHttpRequest()
         var url = "https://entrez.enphaseenergy.com/entrez_tokens"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
         http.open("POST", url, true);
-        http.withCredentials = true;
-		http.setRequestHeader("Host", "entrez.enphaseenergy.com");
-		http.setRequestHeader("Connection", "keep-alive");
-		http.setRequestHeader("Cache-Control", "max-age=0");
-		http.setRequestHeader("sec-ch-ua", "\"Not)A;Brand\";v=\"99\", \"Google Chrome\";v=\"127\", \"Chromium\";v=\"127\"");
-		http.setRequestHeader("sec-ch-ua-mobile", "?0");
-		http.setRequestHeader("sec-ch-ua-platform", "\"Windows\"");
-		http.setRequestHeader("Upgrade-Insecure-Requests", "1");
-		http.setRequestHeader("Origin", "https://entrez.enphaseenergy.com");
-		http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		http.setRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
-		http.setRequestHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
-		http.setRequestHeader("Sec-Fetch-Site", "same-origin");
-		http.setRequestHeader("Sec-Fetch-Mode", "navigate");
-		http.setRequestHeader("Sec-Fetch-User", "?1");
-		http.setRequestHeader("Sec-Fetch-Dest", "document");
-		http.setRequestHeader("Referer", "https://entrez.enphaseenergy.com/login");
-		http.setRequestHeader("Accept-Encoding", "gzip, deflate, br, zstd");
-		http.setRequestHeader("Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7");
-        http.onreadystatechange = function() { // Call a function when the state changes.
-            if (debugOutput) console.log("http.readyState: " + http.readyState)
+        http.setRequestHeader("content-type", "application/x-www-form-urlencoded")
+        http.onreadystatechange = function() {
             if (http.readyState === XMLHttpRequest.DONE) {
-                if (debugOutput) console.log("http.status: " + http.status)
+                if (debugOutput) console.log("*********SolarPanel http.status: " + http.status)
                 if (http.status === 200 || http.status === 300  || http.status === 302) {
                     try {
-						if (debugOutput) console.log("*********SolarPanel getTokenD8 http.status: " + http.status)
+                        if (debugOutput) console.log("*********SolarPanel getTokenD8 http.status: " + http.status)
 						if (debugOutput) console.log("*********SolarPanel getTokenD8 http.responseText: " + http.responseText)
-						var newtoken= http.responseText.split("<textarea name=\"accessToken\" id=\"JWTToken\" cols=\"30\" rows=\"10\" >")[1].split("</textarea>")[0].trim()
-						if (debugOutput) console.log("*********SolarPanel newtokenD8: " + newtoken)
+                        var newtoken= http.responseText.split("<textarea name=\"accessToken\" id=\"JWTToken\" cols=\"30\" rows=\"10\" >")[1].split("</textarea>")[0].trim()
+                        if (debugOutput) console.log("*********SolarPanel newtokenD8:: " + newtoken)
                         if (newtoken !== ""){
-                           checkToken(tempSession, urlString,newtoken,totalValue,"D8")
+						   if (debugOutput) console.log("*********SolarPanel checking token: " + newtoken)
+                           checkToken(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,newtoken, "D8")
                         }else{
                             if (getDataCount == 0){apiKey = ""}
                             if (getDataCount == 1){apiKey2 = ""}
@@ -262,22 +259,26 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
                         parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
                     }
                 } else {
-                     parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
+                    parseReturnData(currentPower,totalValue,todayValue,0,0,0,0, http.status,"error")
                 }
             }
         }
-       http.send(data);
+        http.send(data);
     }
-    function checkToken(tempSession,urlString,apiKeyPlugin,totalValue,invtype){
-		var onetime = true
+
+
+    function checkToken(passWord,userName,urlString,envoyserial,envoyfirmware,totalValue,siteid,newtoken,invtype){
+		console.log("*********SolarPanel Start checkToken()*******************************************************************************")
         if (debugOutput) console.log("*********SolarPanel Start checkToken()")
 		if (debugOutput) console.log("*********SolarPanel haal de enphase info op via tsc command")
 		if (debugOutput) console.log("*********SolarPanel enphase checktoken url " + urlString)
-		if (debugOutput) console.log("*********SolarPanel enphase checktoken apiKeyPlugin " + apiKeyPlugin)
+		if (debugOutput) console.log("*********SolarPanel enphase checktoken newtoken " + newtoken)
+			
+		var onetime = true
 		
 		var doc2 = new XMLHttpRequest();
 		doc2.open("PUT", "file:///tmp/enphase_token.txt");
-		doc2.send(urlString + ";" + apiKeyPlugin);
+		doc2.send(urlString + ";" + newtoken);
 
 		var doc4 = new XMLHttpRequest();
 		doc4.open("PUT", "file:///tmp/tsc.command");
@@ -287,14 +288,14 @@ function startLoginD8(passWord,userName,urlString,envoyserial,envoyfirmware, tot
 		solarEnphaseDelay(8000, function() {
 			if (onetime){
 				onetime = false
-				parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue,invtype)
+				parseEnpaseToken(urlString,passWord,userName,newtoken,totalValue,invtype)
 			}
 		})
 	}
 		
-	function parseEnpaseToken(urlString,passWord,userName,apiKeyPlugin,totalValue,invtype){
+	function parseEnpaseToken(urlString,passWord,userName,newtoken,totalValue,invtype){
 		if (debugOutput) console.log("*********SolarPanel Start parseEnpaseToken()")
-		if (debugOutput) console.log("*********SolarPanel apiKeyPlugin: " + apiKeyPlugin)
+		if (debugOutput) console.log("*********SolarPanel newtoken: " + newtoken)
         var http = new XMLHttpRequest()
         var url = "file:///tmp/enphase_token_return.txt"
         if (debugOutput) console.log("*********SolarPanel url: " + url)
