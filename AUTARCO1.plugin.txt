@@ -1,0 +1,114 @@
+/////////             <version>1.0.0</version>
+/////////                     AUTARCO1                         /////////////
+/////////  Plugin to extract Autarco Solar data for Toon       /////////////
+/////////                   By frankjansenrsn-bit              /////////////
+//
+// Settings mapping:
+//   userName  = Autarco e-mailadres
+//   passWord  = Autarco wachtwoord
+//   siteid    = Site ID  (te vinden in de URL: my.autarco.com/site/<siteid>)
+//   apiKey    = Inverter ID (serienummer omvormer)
+
+var _autarcoSessionValid = false;
+var _autarcoLastLogin = 0;
+var LOGIN_INTERVAL_MS = 3600000; // herlogin elke 60 minuten
+
+function getSolarData(passWord, userName, apiKey, siteid, urlString, totalValue) {
+    var now = new Date().getTime();
+    if (_autarcoSessionValid && (now - _autarcoLastLogin) < LOGIN_INTERVAL_MS) {
+        _fetchPower(passWord, userName, apiKey, siteid, totalValue, false);
+    } else {
+        _getLoginToken(passWord, userName, apiKey, siteid, totalValue);
+    }
+}
+
+function _getLoginToken(passWord, userName, apiKey, siteid, totalValue) {
+    var http = new XMLHttpRequest();
+    http.open("GET", "https://my.autarco.com/auth/login", true);
+    http.onreadystatechange = function() {
+        if (http.readyState !== 4) return;
+        if (http.status === 200) {
+            var match = http.responseText.match(/name="_token"\s+value="([^"]+)"/);
+            if (match) {
+                _doLogin(match[1], passWord, userName, apiKey, siteid, totalValue);
+            } else {
+                if (debugOutput) console.log("AUTARCO1: CSRF token niet gevonden");
+                parseReturnData(0, totalValue, 0, 0, 0, 0, 0, 0, "error");
+            }
+        } else {
+            if (debugOutput) console.log("AUTARCO1: login pagina fout " + http.status);
+            parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error");
+        }
+    };
+    http.send();
+}
+
+function _doLogin(csrfToken, passWord, userName, apiKey, siteid, totalValue) {
+    var http = new XMLHttpRequest();
+    http.open("POST", "https://my.autarco.com/auth/login", true);
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Referer", "https://my.autarco.com/auth/login");
+    http.onreadystatechange = function() {
+        if (http.readyState !== 4) return;
+        if (http.status === 200 || http.status === 302 || http.status === 301) {
+            _autarcoSessionValid = true;
+            _autarcoLastLogin = new Date().getTime();
+            if (debugOutput) console.log("AUTARCO1: ingelogd");
+            _fetchPower(passWord, userName, apiKey, siteid, totalValue, false);
+        } else {
+            _autarcoSessionValid = false;
+            if (debugOutput) console.log("AUTARCO1: inloggen mislukt " + http.status);
+            parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error");
+        }
+    };
+    var body = "_token=" + encodeURIComponent(csrfToken)
+             + "&username=" + encodeURIComponent(userName)
+             + "&password=" + encodeURIComponent(passWord)
+             + "&remember=on";
+    http.send(body);
+}
+
+function _fetchPower(passWord, userName, apiKey, siteid, totalValue, retried) {
+    var url = "https://my.autarco.com/api/site/" + siteid + "/inverter/" + apiKey + "/power";
+    var http = new XMLHttpRequest();
+    http.open("GET", url, true);
+    http.onreadystatechange = function() {
+        if (http.readyState !== 4) return;
+        if (http.status === 200) {
+            var data = JSON.parse(http.responseText);
+            var currentPower = data.pv_now || 0;
+            _fetchEnergy(passWord, userName, apiKey, siteid, currentPower, totalValue, retried);
+        } else if ((http.status === 401 || http.status === 403) && !retried) {
+            // Sessie verlopen — opnieuw inloggen
+            _autarcoSessionValid = false;
+            _getLoginToken(passWord, userName, apiKey, siteid, totalValue);
+        } else {
+            if (debugOutput) console.log("AUTARCO1: power fout " + http.status);
+            parseReturnData(0, totalValue, 0, 0, 0, 0, 0, http.status, "error");
+        }
+    };
+    http.send();
+}
+
+function _fetchEnergy(passWord, userName, apiKey, siteid, currentPower, totalValue, retried) {
+    var url = "https://my.autarco.com/api/site/" + siteid + "/inverter/" + apiKey + "/energy";
+    var http = new XMLHttpRequest();
+    http.open("GET", url, true);
+    http.onreadystatechange = function() {
+        if (http.readyState !== 4) return;
+        if (http.status === 200) {
+            var data = JSON.parse(http.responseText);
+            var todayWh  = Math.round((data.pv_today   || 0) * 1000);
+            var totalWh  = Math.round((data.pv_to_date || 0) * 1000);
+            if (debugOutput) console.log("AUTARCO1: " + currentPower + "W, vandaag=" + todayWh + "Wh, totaal=" + totalWh + "Wh");
+            parseReturnData(currentPower, totalWh, todayWh, 0, 0, 0, 0, http.status, "succes");
+        } else if ((http.status === 401 || http.status === 403) && !retried) {
+            _autarcoSessionValid = false;
+            _getLoginToken(passWord, userName, apiKey, siteid, totalValue);
+        } else {
+            if (debugOutput) console.log("AUTARCO1: energy fout " + http.status);
+            parseReturnData(currentPower, totalValue, 0, 0, 0, 0, 0, http.status, "error");
+        }
+    };
+    http.send();
+}
