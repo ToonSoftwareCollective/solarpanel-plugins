@@ -1,0 +1,562 @@
+/////////             <version>1.0.0</version>
+/////////                     SOLEDGE2                     /////////////
+/////////  Plugin to extract SolarEdge Solar data for Toon ///////////////
+/////////  via the SolarEdge Monitoring API V2 (OAuth)     ///////////////
+/////////                   By WickedMaster                ///////////////
+//
+// SolarEdge switched off the old API (V1, api_key) on 3 November 2026.
+// V2 works with a "Site Access" application in the SolarEdge developer console
+// and a one-time approval in the browser:
+//   https://toonsoftwarecollective.github.io/solarpanel-plugins/solaredge/
+//
+// Fields in the SolarPanel settings screen:
+//   Gebruikersnaam = Client ID
+//   Wachtwoord     = Client Secret
+//   SiteID         = Site ID
+//   API Key        = koppelcode (one-time code shown by the page above)
+//
+// After the one-time coupling the plugin renews its own access (every 2 hours).
+// The state (tokens, cached values) is stored as JSON in
+// /mnt/data/tsc/appData/solarPanel_refreshtoken.txt (inverter 1) or
+// solarPanel_refreshtoken2.txt (inverter 2).
+//
+// Free SolarEdge plan: 2000 calls a month, 10 a minute. The app asks for data every
+// 5 minutes; this plugin only calls SolarEdge every 20 minutes, in daylight, and
+// returns the last known values in between (about 1600 calls a month in June).
+
+var se2ApiBase = "https://monitoringapi.solaredge.com/v2"
+var se2TokenUrl = "https://monitoringapi.solaredge.com/v2/oauth2/token"
+var se2RedirectUri = "https://toonsoftwarecollective.github.io/solarpanel-plugins/solaredge/"
+var se2PollIntervalMs = 1170000          // 19.5 minutes: every 4th call of the app (5 min)
+var se2PowerStaleMs = 4500000            // power older than 75 minutes counts as 0 W
+var se2BusyTimeoutMs = 600000           // a request that hangs blocks new calls for at most 10 minutes
+var se2Busy = [false, false, false]
+var se2BusySince = [0, 0, 0]
+var se2State = [null, null, null]        // one shared state object per inverter slot
+
+	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+		var slot = (getDataCount == 1) ? 2 : 1
+		var cfg = {
+			slot: slot,
+			clientId: se2Trim(userName),
+			clientSecret: se2Trim(passWord),
+			siteId: se2Trim(siteid),
+			code: se2CleanCode(apiKey),
+			appTotal: totalValue
+		}
+		se2Log(slot, "start getSolarData")
+		var st = se2Load(slot)
+		var now = se2Now()
+
+		if (cfg.clientId === "" || cfg.clientSecret === "" || cfg.siteId === ""){
+			se2Finish(cfg, st, false, 0, "Client ID (Gebruikersnaam), Client Secret (Wachtwoord) of SiteID ontbreekt")
+			return
+		}
+
+		if (se2Busy[slot] && (now - se2BusySince[slot]) < se2BusyTimeoutMs){
+			se2Log(slot, "previous request still running, returning cached values")
+			se2Report(cfg, st, true, 200, true)
+			return
+		}
+
+		// other application or other site: start over
+		if (st.clientId !== cfg.clientId || st.siteId !== cfg.siteId){
+			se2Log(slot, "new Client ID or SiteID, resetting state")
+			st = { plugin: "SOLEDGE2", clientId: cfg.clientId, siteId: cfg.siteId, dirty: true }
+			se2State[slot] = st
+		}
+
+		se2Rollover(st, now)
+
+		// a new koppelcode was entered: exchange it for tokens right away
+		if (cfg.code !== "" && cfg.code !== st.usedCode){
+			se2SetBusy(slot, true)
+			se2Exchange(cfg, st, function(){
+				st.lastPoll = 0
+				se2WithToken(cfg, st, function(){ se2Poll(cfg, st, false) })
+			})
+			return
+		}
+
+		if (!st.refreshToken){
+			se2Finish(cfg, st, false, 0, "Niet gekoppeld: vraag een koppelcode op via " + se2RedirectUri + " en vul die in bij API Key")
+			return
+		}
+
+		if (!se2ShouldPoll(st, now)){
+			se2Finish(cfg, st, true, 200, null, true)
+			return
+		}
+
+		se2SetBusy(slot, true)
+		se2WithToken(cfg, st, function(){ se2Poll(cfg, st, false) })
+	}
+
+/////////////////////////////////////////////////////////////// TOKENS ///////////////////////////////////////////////////////////////
+
+	function se2Exchange(cfg, st, onOk){
+		se2Log(cfg.slot, "exchanging koppelcode for tokens")
+		var body = {
+			grant_type: "authorization_code",
+			code: cfg.code,
+			redirect_uri: se2RedirectUri,
+			client_id: cfg.clientId,
+			client_secret: cfg.clientSecret
+		}
+		se2Request("POST", se2TokenUrl, null, body, function(status, json, retryAfter){
+			if (status === 200 && json && json.access_token && json.refresh_token){
+				se2StoreTokens(st, json)
+				st.usedCode = cfg.code
+				st.lastError = ""
+				se2Save(cfg.slot, st)
+				se2Log(cfg.slot, "coupled, tokens stored")
+				onOk()
+			} else if (status >= 400 && status < 500 && status !== 429){
+				// the code is spent or expired; do not try it again every 5 minutes
+				st.usedCode = cfg.code
+				st.dirty = true
+				se2Finish(cfg, st, false, status, "Koppelcode geweigerd (" + se2ErrText(status, json) + "): vraag een nieuwe koppelcode op en vul die direct in")
+			} else {
+				se2Finish(cfg, st, false, status, "Koppelen mislukt, wordt opnieuw geprobeerd (" + se2ErrText(status, json) + ")")
+			}
+		})
+	}
+
+	function se2WithToken(cfg, st, onOk){
+		if (st.accessToken && (st.accessExpires - se2Now()) > 120000){
+			onOk()
+			return
+		}
+		se2Log(cfg.slot, "refreshing access token")
+		var body = {
+			grant_type: "refresh_token",
+			refresh_token: st.refreshToken,
+			client_id: cfg.clientId,
+			client_secret: cfg.clientSecret
+		}
+		se2Request("POST", se2TokenUrl, null, body, function(status, json, retryAfter){
+			if (status === 200 && json && json.access_token && json.refresh_token){
+				// every refresh returns a new refresh token and the old one is invalid at once: save first
+				se2StoreTokens(st, json)
+				se2Save(cfg.slot, st)
+				onOk()
+			} else if (status === 400 || status === 401 || status === 403){
+				st.refreshToken = ""
+				st.accessToken = ""
+				st.accessExpires = 0
+				st.dirty = true
+				se2Finish(cfg, st, false, status, "Koppeling verlopen (" + se2ErrText(status, json) + "): vraag een nieuwe koppelcode op via " + se2RedirectUri)
+			} else {
+				se2Finish(cfg, st, false, status, "Vernieuwen toegang mislukt, wordt opnieuw geprobeerd (" + se2ErrText(status, json) + ")")
+			}
+		})
+	}
+
+	function se2StoreTokens(st, json){
+		var lifetime = parseInt(json.expires_in)
+		if (isNaN(lifetime) || lifetime <= 0) lifetime = 7200
+		st.accessToken = json.access_token
+		st.refreshToken = json.refresh_token
+		st.accessExpires = se2Now() + lifetime * 1000
+		st.tokenTime = se2Now()
+	}
+
+/////////////////////////////////////////////////////////////// DATA ///////////////////////////////////////////////////////////////
+
+	function se2Poll(cfg, st, retried){
+		var now = se2Now()
+		var dayKey = se2DateKey(now)
+		var site = encodeURIComponent(cfg.siteId)
+
+		// step 1 (once): installation date, needed for the lifetime total
+		if (!st.installDate && st.installTried !== dayKey){
+			st.installTried = dayKey
+			st.dirty = true
+			se2Get(cfg, st, "/sites/" + site, function(status, json){
+				if (status === 200 && json){
+					var siteInfo = json.site ? json.site : json
+					if (siteInfo.installationDate) st.installDate = String(siteInfo.installationDate)
+				}
+				se2Poll(cfg, st, retried)
+			}, retried, function(){ se2Poll(cfg, st, true) })
+			return
+		}
+
+		// step 2: today's production per quarter hour since midnight
+		var midnight = se2Midnight(now)
+		var path = st.usePowerEndpoint
+			? "/sites/" + site + "/power?resolution=QUARTER_HOUR&unit=W&from=" + encodeURIComponent(se2Instant(midnight)) + "&to=" + encodeURIComponent(se2Instant(now))
+			: "/sites/" + site + "/inverters/telemetry?resolution=QUARTER_HOUR&from=" + encodeURIComponent(se2Instant(midnight)) + "&to=" + encodeURIComponent(se2Instant(now))
+
+		se2Get(cfg, st, path, function(status, json, retryAfter){
+			if (status === 404 && !st.usePowerEndpoint){
+				// no inverter telemetry for this site: use the site power instead
+				se2Log(cfg.slot, "inverter telemetry not available, switching to site power")
+				st.usePowerEndpoint = true
+				st.dirty = true
+				se2Poll(cfg, st, retried)
+				return
+			}
+			if (status === 429){
+				se2Backoff(st, retryAfter)
+				se2Finish(cfg, st, false, status, "Limiet van SolarEdge bereikt, even pauze")
+				return
+			}
+			if (status !== 200 || !json){
+				st.lastPoll = now
+				st.dirty = true
+				var msg = (status === 403) ? "Geen toegang: controleer de rechten SITE_DATA en DEVICE_DATA en de SiteID" :
+				          (status === 404) ? "SiteID onbekend of geen gegevens voor deze site" :
+				          "Ophalen mislukt"
+				se2Finish(cfg, st, false, status, msg + " (" + se2ErrText(status, json) + ")")
+				return
+			}
+
+			var result = st.usePowerEndpoint ? se2ParsePower(json, now) : se2ParseTelemetry(json, now)
+			st.power = result.power
+			st.today = result.today
+			st.lastPoll = now
+			st.pollDay = dayKey
+			st.backoffUntil = 0
+			if (!se2InWindow(now)) st.finalDay = dayKey
+			st.dirty = true
+
+			// step 3 (once a day): lifetime total up to last midnight; the app adds today
+			var installed = se2ParseTime(st.installDate)
+			if (st.installDate && !isNaN(installed) && installed < midnight && st.baselineFetched !== dayKey){
+				st.baselineFetched = dayKey
+				se2Get(cfg, st, "/sites/" + site + "/energy?resolution=YEAR&unit=WH&from=" + encodeURIComponent(se2Instant(installed)) + "&to=" + encodeURIComponent(se2Instant(midnight)), function(status2, json2){
+					if (status2 === 200 && json2){
+						var lifetime = se2SumSeries(json2, true)
+						if (lifetime !== null && lifetime > 0){
+							st.baseline = Math.round(lifetime)
+							st.baselineDay = dayKey
+						}
+					}
+					se2Finish(cfg, st, true, 200, null)
+				}, true, null)
+				return
+			}
+			se2Finish(cfg, st, true, 200, null)
+		}, retried, function(){ se2Poll(cfg, st, true) })
+	}
+
+	// GET with the access token; on 401 refresh the token once and retry
+	function se2Get(cfg, st, path, cb, retried, retry){
+		se2Log(cfg.slot, "GET " + path)
+		se2Request("GET", se2ApiBase + path, st.accessToken, null, function(status, json, retryAfter){
+			if (status === 401 && !retried && retry){
+				st.accessToken = ""
+				st.accessExpires = 0
+				se2WithToken(cfg, st, retry)
+				return
+			}
+			cb(status, json, retryAfter)
+		})
+	}
+
+	function se2ParseTelemetry(json, now){
+		var power = 0
+		var today = 0
+		var inverters = json.inverters
+		if (inverters && typeof inverters === "object"){
+			for (var serial in inverters){
+				var m = inverters[serial]
+				if (!m || typeof m !== "object") continue
+				var e = se2SumSeries(m.energy, true)
+				if (e !== null) today += e
+				power += se2LatestPower(m.power, now)
+			}
+		}
+		return { power: Math.round(power), today: Math.round(today) }
+	}
+
+	// fallback: site power per quarter hour; energy = average power x 0.25 h
+	function se2ParsePower(json, now){
+		var series = json.power ? json.power : json
+		var factor = se2Factor(series.unit, true)
+		var today = 0
+		var values = series.values || []
+		for (var i = 0; i < values.length; i++){
+			var v = values[i] ? values[i].value : null
+			if (typeof v === "number") today += v * factor * 0.25
+		}
+		return { power: Math.round(se2LatestPower(series, now)), today: Math.round(today) }
+	}
+
+	function se2LatestPower(series, now){
+		if (!series || !series.values) return 0
+		var factor = se2Factor(series.unit, true)
+		for (var i = series.values.length - 1; i >= 0; i--){
+			var s = series.values[i]
+			if (s && typeof s.value === "number"){
+				var t = se2ParseTime(s.timestamp)
+				if (!isNaN(t) && (now - t) > se2PowerStaleMs) return 0
+				return Math.max(0, s.value * factor)
+			}
+		}
+		return 0
+	}
+
+	// sum of a Measurements series ({unit, values:[{timestamp, value}]}), in Wh or W
+	function se2SumSeries(series, isEnergy){
+		if (!series || !series.values) return null
+		var factor = isEnergy ? se2Factor(series.unit, false) : se2Factor(series.unit, true)
+		var sum = 0
+		var found = false
+		for (var i = 0; i < series.values.length; i++){
+			var v = series.values[i] ? series.values[i].value : null
+			if (typeof v === "number"){
+				sum += v * factor
+				found = true
+			}
+		}
+		return found ? sum : 0
+	}
+
+	function se2Factor(unit, isPower){
+		var u = String(unit || (isPower ? "W" : "WH")).toUpperCase()
+		if (isPower){
+			if (u === "KW") return 1000
+			if (u === "MW") return 1000000
+			return 1
+		}
+		if (u === "KWH") return 1000
+		if (u === "MWH") return 1000000
+		if (u === "GWH") return 1000000000
+		return 1
+	}
+
+/////////////////////////////////////////////////////////////// SCHEDULE ///////////////////////////////////////////////////////////////
+
+	function se2ShouldPoll(st, now){
+		if (st.backoffUntil && now < st.backoffUntil) return false
+		if ((now - (st.lastPoll || 0)) < se2PollIntervalMs) return false
+		if (se2InWindow(now)) return true
+		// one last call after sunset for the final day total
+		var w = se2Window(now)
+		var minutes = se2MinutesOfDay(now)
+		return (minutes > w.end && st.finalDay !== se2DateKey(now) && st.lastPoll > 0)
+	}
+
+	function se2InWindow(now){
+		var w = se2Window(now)
+		var minutes = se2MinutesOfDay(now)
+		return (minutes >= w.start && minutes <= w.end)
+	}
+
+	// daylight window in minutes since midnight (local time)
+	function se2Window(now){
+		try {
+			// sunrise and sunset from the app (percentage of 05:00 - 23:00)
+			if (typeof sunrisePerc !== "undefined" && typeof sunsetPerc !== "undefined" && sunrisePerc > 0 && sunsetPerc > sunrisePerc && sunsetPerc < 100){
+				return { start: Math.round(300 + sunrisePerc * 10.8) - 10, end: Math.round(300 + sunsetPerc * 10.8) + 30 }
+			}
+		} catch(e) {}
+		// fallback for the Netherlands, generous per month
+		var table = [[510,1050],[465,1095],[405,1200],[390,1245],[330,1290],[315,1325],[325,1325],[360,1290],[410,1230],[435,1155],[440,1035],[510,1000]]
+		var m = new Date(now).getMonth()
+		return { start: table[m][0], end: table[m][1] }
+	}
+
+	function se2Backoff(st, retryAfter){
+		var seconds = parseInt(retryAfter)
+		if (!isNaN(seconds) && seconds > 0){
+			st.backoffUntil = se2Now() + Math.max(seconds, 60) * 1000
+		} else {
+			// no Retry-After: most likely the monthly limit
+			st.backoffUntil = se2Now() + 12 * 3600 * 1000
+		}
+		st.dirty = true
+	}
+
+	// a new day: yesterday's production moves into the lifetime baseline
+	function se2Rollover(st, now){
+		var key = se2DateKey(now)
+		if (st.day === key) return
+		if (st.day && typeof st.baseline === "number" && st.baseline > 0 && st.baselineDay === st.day){
+			st.baseline = st.baseline + (st.today || 0)
+			st.baselineDay = key
+		}
+		st.today = 0
+		st.power = 0
+		st.day = key
+		st.finalDay = ""
+		st.dirty = true
+	}
+
+/////////////////////////////////////////////////////////////// RESULT ///////////////////////////////////////////////////////////////
+
+	// end of a call: clear busy, store the state, hand the values to the app
+	function se2Finish(cfg, st, ok, status, message, cached){
+		se2SetBusy(cfg.slot, false)
+		var now = se2Now()
+		if (message){
+			st.lastError = se2DateKey(now) + " " + se2Pad(new Date(now).getHours()) + ":" + se2Pad(new Date(now).getMinutes()) + " " + message
+			st.dirty = true
+			se2Log(cfg.slot, message)
+		} else if (ok && !cached && st.lastError){
+			st.lastError = ""
+			st.dirty = true
+		}
+		if (st.dirty) se2Save(cfg.slot, st)
+		se2Report(cfg, st, ok, status, cached)
+	}
+
+	// exactly one parseReturnData per getSolarData call
+	function se2Report(cfg, st, ok, status, cached){
+		var now = se2Now()
+		var dayKey = se2DateKey(now)
+		var fresh = st.lastPoll && (now - st.lastPoll) < 1800000 && se2InWindow(now)
+		var power = (st.day === dayKey && fresh) ? (st.power || 0) : 0
+		var today = (st.day === dayKey) ? (st.today || 0) : 0
+		var total = 0
+		if (st.baselineDay === dayKey && typeof st.baseline === "number" && st.baseline > 0){
+			total = Math.round(st.baseline + today)
+		}
+
+		if (ok){
+			se2Log(cfg.slot, (cached ? "cached" : "fresh") + " power " + power + " W, today " + today + " Wh, total " + total + " Wh")
+			parseReturnData(power, total, today, 0, 0, 0, 0, status, "succes")
+		} else {
+			// on an error the app takes these values over as they are: keep the known values
+			if (total === 0) total = cfg.appTotal
+			if (st.pollDay !== dayKey) today = (typeof todayValue !== "undefined") ? todayValue : 0
+			parseReturnData(power, total, today, 0, 0, 0, 0, status, "error")
+		}
+	}
+
+/////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////
+
+	function se2Request(method, url, accessToken, body, cb){
+		var http = new XMLHttpRequest()
+		var done = false
+		http.open(method, url, true)
+		http.setRequestHeader("Accept", "application/json")
+		if (accessToken) http.setRequestHeader("Authorization", "Bearer " + accessToken)
+		if (body !== null) http.setRequestHeader("Content-Type", "application/json")
+		http.onreadystatechange = function(){
+			if (http.readyState === XMLHttpRequest.DONE && !done){
+				done = true
+				var json = null
+				var retryAfter = null
+				try { json = JSON.parse(http.responseText) } catch(e) {}
+				try { retryAfter = http.getResponseHeader("Retry-After") } catch(e2) {}
+				cb(http.status, json, retryAfter)
+			}
+		}
+		if (body !== null){
+			http.send(JSON.stringify(body))
+		} else {
+			http.send()
+		}
+	}
+
+	function se2ErrText(status, json){
+		var text = "HTTP " + status
+		if (json){
+			var detail = json.error_description || json.error || json.message || json.detail || ""
+			if (detail) text += ": " + String(detail).substring(0, 120)
+		}
+		return text
+	}
+
+	// read the state file once; after that every call works on the same object
+	function se2Load(slot){
+		if (se2State[slot]) return se2State[slot]
+		var st = null
+		try {
+			var txt = (slot === 2) ? solarPanel_refreshtoken2.read() : solarPanel_refreshtoken.read()
+			st = JSON.parse(txt)
+		} catch(e) {}
+		if (!st || st.plugin !== "SOLEDGE2") st = { plugin: "SOLEDGE2" }
+		st.dirty = false
+		se2State[slot] = st
+		return st
+	}
+
+	function se2Save(slot, st){
+		st.dirty = false
+		try {
+			var txt = JSON.stringify(st)
+			if (slot === 2){
+				solarPanel_refreshtoken2.write(txt)
+			} else {
+				solarPanel_refreshtoken.write(txt)
+			}
+			return true
+		} catch(e) {
+			se2Log(slot, "saving state failed: " + e)
+			return false
+		}
+	}
+
+	function se2SetBusy(slot, busy){
+		se2Busy[slot] = busy
+		se2BusySince[slot] = busy ? se2Now() : 0
+	}
+
+	function se2Trim(value){
+		if (value === undefined || value === null) return ""
+		return String(value).replace(/^\s+|\s+$/g, "")
+	}
+
+	// accepts the bare code or a pasted redirect address (...?code=XYZ&site_id=...)
+	function se2CleanCode(value){
+		var v = se2Trim(value)
+		var i = v.indexOf("code=")
+		if (i > -1){
+			v = v.substring(i + 5)
+			var amp = v.indexOf("&")
+			if (amp > -1) v = v.substring(0, amp)
+			try { v = decodeURIComponent(v) } catch(e) {}
+		}
+		return v
+	}
+
+	function se2Now(){
+		return new Date().getTime()
+	}
+
+	function se2Midnight(now){
+		var d = new Date(now)
+		return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime()
+	}
+
+	function se2MinutesOfDay(now){
+		var d = new Date(now)
+		return d.getHours() * 60 + d.getMinutes()
+	}
+
+	function se2DateKey(now){
+		var d = new Date(now)
+		return d.getFullYear() + "-" + se2Pad(d.getMonth() + 1) + "-" + se2Pad(d.getDate())
+	}
+
+	function se2Pad(n){
+		return (n < 10 ? "0" : "") + n
+	}
+
+	// UTC instant without milliseconds, as the API expects: 2026-11-17T21:00:00Z
+	function se2Instant(ms){
+		return new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z")
+	}
+
+	function se2ParseTime(text){
+		if (!text) return NaN
+		var t = Date.parse(String(text))
+		if (!isNaN(t)) return t
+		// 2026-10-16T12:15:00+02:00 on engines without offset support
+		var m = String(text).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|([+-])(\d{2}):?(\d{2}))?$/)
+		if (!m) return NaN
+		var utc = Date.UTC(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10), parseInt(m[4], 10), parseInt(m[5], 10), parseInt(m[6], 10))
+		if (m[8]){
+			var offset = (parseInt(m[9], 10) * 60 + parseInt(m[10], 10)) * 60000
+			utc = (m[8] === "+") ? utc - offset : utc + offset
+		}
+		return utc
+	}
+
+	function se2Log(slot, text){
+		if (debugOutput) console.log("*********SolarPanel SOLEDGE2 (" + slot + ") " + text)
+	}

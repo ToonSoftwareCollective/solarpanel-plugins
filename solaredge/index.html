@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<title>SolarEdge koppelen aan je Toon</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1d2733;
+    --muted: #5b6876;
+    --line: #dde3e9;
+    --accent: #0b6e4f;
+    --accent-text: #ffffff;
+    --accent-soft: #e3f2ec;
+    --warn-soft: #fff4e0;
+    --warn-line: #f0c36d;
+    --err-soft: #fdecec;
+    --err-line: #e5a3a3;
+    --code-bg: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12171c;
+      --card: #1b2229;
+      --text: #e6ebf0;
+      --muted: #9aa7b4;
+      --line: #2c3640;
+      --accent: #3fbf8f;
+      --accent-text: #0d1a14;
+      --accent-soft: #17332a;
+      --warn-soft: #3a2f17;
+      --warn-line: #8a6a2a;
+      --err-soft: #3a1d1d;
+      --err-line: #8a3d3d;
+      --code-bg: #232c35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { margin-bottom: 20px; }
+  header .kicker { color: var(--muted); font-size: 14px; margin: 0 0 4px; }
+  h1 { font-size: 26px; line-height: 1.25; margin: 0 0 8px; }
+  header p { margin: 0; color: var(--muted); }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+  h2 { font-size: 19px; margin: 0 0 12px; display: flex; gap: 10px; align-items: baseline; }
+  h2 .num {
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: var(--accent-text);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; transform: translateY(-2px);
+  }
+  ol { margin: 0; padding-left: 22px; }
+  li { margin: 6px 0; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.92em; }
+  a { color: var(--accent); }
+  .copyrow { display: flex; gap: 8px; align-items: stretch; margin: 10px 0 4px; }
+  .copyrow .value {
+    flex: 1; min-width: 0; background: var(--code-bg); border-radius: 8px; padding: 10px 12px;
+    overflow-wrap: anywhere; font-size: 14px;
+  }
+  button, .button {
+    font: inherit; font-weight: 600; border-radius: 8px; border: 1px solid var(--accent);
+    background: var(--accent); color: var(--accent-text); padding: 10px 16px; cursor: pointer;
+    text-decoration: none; display: inline-block;
+  }
+  button.secondary { background: transparent; color: var(--accent); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input[type=text] {
+    width: 100%; font: inherit; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .hint { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+  .note { border-radius: 8px; padding: 12px 14px; margin-top: 12px; font-size: 15px; }
+  .note.warn { background: var(--warn-soft); border: 1px solid var(--warn-line); }
+  .note.err { background: var(--err-soft); border: 1px solid var(--err-line); }
+  .note.ok { background: var(--accent-soft); border: 1px solid var(--accent); }
+  #result { border: 2px solid var(--accent); }
+  .bigcode {
+    font-size: 26px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.5;
+    background: var(--code-bg); border-radius: 10px; padding: 14px 16px; overflow-wrap: anywhere;
+  }
+  .bigcode span { margin-right: 0.45em; white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; width: 42%; }
+  td { overflow-wrap: anywhere; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 8px 0 0; }
+  footer { color: var(--muted); font-size: 13px; margin-top: 24px; text-align: center; }
+  [hidden] { display: none !important; }
+  @media (max-width: 480px) {
+    h1 { font-size: 22px; }
+    section { padding: 16px; }
+    .bigcode { font-size: 21px; }
+    .copyrow { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="kicker">SolarPanel-app voor de Toon</p>
+    <h1>SolarEdge koppelen aan je Toon</h1>
+    <p>SolarEdge werkt sinds 3 november 2026 niet meer met een API-key. Je koppelt je Toon nu één keer via deze pagina; daarna houdt de Toon de koppeling zelf bij.</p>
+  </header>
+
+  <section id="result" hidden>
+    <h2>Je koppelcode</h2>
+    <div class="bigcode mono" id="codeBig"></div>
+    <div class="actions">
+      <button type="button" id="copyCode">Kopieer code</button>
+      <span class="hint" id="codeLen"></span>
+    </div>
+    <div class="note warn"><strong>Vul de code direct in op de Toon.</strong> Hij is maar kort geldig en werkt één keer. Lukt het niet, haal dan hieronder gewoon een nieuwe code op.</div>
+    <p style="margin:16px 0 4px"><strong>Op de Toon:</strong> SolarPanel &rarr; instellingen &rarr; kies <em>Solaredge</em> en vul in:</p>
+    <table>
+      <tr><th>Gebruikersnaam</th><td>je Client ID</td></tr>
+      <tr><th>Wachtwoord</th><td>je Client Secret</td></tr>
+      <tr><th>SiteID</th><td class="mono" id="siteCell">je Site ID</td></tr>
+      <tr><th>API Key</th><td>de koppelcode hierboven</td></tr>
+    </table>
+    <p class="hint">Daarna opslaan. Binnen een paar minuten verschijnt je opbrengst op de Toon.</p>
+  </section>
+
+  <section id="errorBox" hidden>
+    <h2>Koppelen niet gelukt</h2>
+    <div class="note err" id="errorText"></div>
+    <p class="hint">Controleer of de redirect-URL in je SolarEdge-applicatie precies klopt (stap 1) en probeer het opnieuw.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">1</span>Eenmalig: applicatie aanmaken bij SolarEdge</h2>
+    <ol>
+      <li>Ga naar <a href="https://developer.solaredge.com" target="_blank" rel="noopener">developer.solaredge.com</a> en log in met je mySolarEdge-account (hetzelfde als in de SolarEdge-app).</li>
+      <li>Kies <strong>Create Application</strong>, service <strong>Monitoring API</strong>, toegang <strong>Site Access</strong>.</li>
+      <li>Zet de rechten <code>SITE_DATA</code> en <code>DEVICE_DATA</code> aan.</li>
+      <li>Vul bij <strong>Allowed Redirect URL</strong> precies dit adres in en klik op <strong>Save Changes</strong>:
+        <div class="copyrow">
+          <div class="value mono" id="redirectValue"></div>
+          <button type="button" class="secondary" id="copyRedirect">Kopieer</button>
+        </div>
+      </li>
+      <li>Noteer de <strong>Client ID</strong> en het <strong>Client Secret</strong>. Het Client Secret wordt maar één keer getoond; bewaar het goed.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span>Koppelcode ophalen</h2>
+    <label for="clientId">Client ID</label>
+    <input type="text" id="clientId" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="plak hier je Client ID">
+    <div class="actions">
+      <button type="button" id="connect" disabled>Koppelen bij SolarEdge</button>
+    </div>
+    <p class="hint">Je gaat naar de inlogpagina van SolarEdge. Log in en klik op <strong>Approve</strong>; daarna kom je vanzelf hier terug met je koppelcode. Je Client Secret heb je hier niet nodig: dat vul je alleen op de Toon in.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span>Invullen op de Toon</h2>
+    <p style="margin:0">Zodra je terug bent, staat bovenaan deze pagina je koppelcode en wat je waar invult. Na het opslaan haalt de Toon zelf de gegevens op.</p>
+    <details>
+      <summary>Hoe vaak wordt de opbrengst bijgewerkt?</summary>
+      <p>Elke 20 minuten, alleen overdag. Met een gratis SolarEdge-account mag je 2.000 keer per maand gegevens ophalen; zo blijft de Toon daar het hele jaar onder. Het actuele vermogen is een gemiddelde over een kwartier.</p>
+    </details>
+    <details>
+      <summary>Moet ik dit later opnieuw doen?</summary>
+      <p>Normaal niet: de Toon vernieuwt de toegang zelf. Alleen als de Toon langer dan 30 dagen uit staat of geen internet heeft, na 24 maanden, of als je bij SolarEdge een nieuw Client Secret aanmaakt, haal je hier een nieuwe koppelcode op en vul je die in bij API Key.</p>
+    </details>
+    <details>
+      <summary>Is dit veilig?</summary>
+      <p>Deze pagina krijgt alleen de koppelcode te zien, en daar kan niemand iets mee zonder jouw Client Secret. Dat vul je alleen op je eigen Toon in. Er wordt niets naar een server gestuurd; alleen je Client ID wordt in je eigen browser onthouden voor de volgende keer.</p>
+    </details>
+  </section>
+
+  <footer>Toon Software Collective &middot; deze pagina is geen onderdeel van SolarEdge</footer>
+</main>
+
+<script>
+(function () {
+  var REDIRECT_URI = "https://toonsoftwarecollective.github.io/solarpanel-plugins/solaredge/";
+  var AUTHORIZE_URL = "https://connect.solaredge.com/authorize";
+  var STORE_KEY = "solaredgeClientId";
+
+  function $(id) { return document.getElementById(id); }
+
+  function store(key, value) {
+    try { if (value) { localStorage.setItem(key, value); } else { localStorage.removeItem(key); } } catch (e) {}
+  }
+  function load(key) {
+    try { return localStorage.getItem(key) || ""; } catch (e) { return ""; }
+  }
+
+  function copy(text, button) {
+    var original = button.textContent;
+    function done(ok) {
+      button.textContent = ok ? "Gekopieerd" : "Kopiëren lukt niet, selecteer de tekst";
+      setTimeout(function () { button.textContent = original; }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    } else {
+      done(false);
+    }
+  }
+
+  $("redirectValue").textContent = REDIRECT_URI;
+  $("copyRedirect").addEventListener("click", function () { copy(REDIRECT_URI, this); });
+
+  var input = $("clientId");
+  var connect = $("connect");
+  input.value = load(STORE_KEY);
+  function update() { connect.disabled = input.value.trim() === ""; }
+  input.addEventListener("input", update);
+  update();
+
+  connect.addEventListener("click", function () {
+    var clientId = input.value.trim();
+    if (!clientId) return;
+    store(STORE_KEY, clientId);
+    var state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    var url = AUTHORIZE_URL +
+      "?client_id=" + encodeURIComponent(clientId) +
+      "&response_type=code" +
+      "&redirect_uri=" + encodeURIComponent(REDIRECT_URI) +
+      "&scope=" + encodeURIComponent("SITE_DATA DEVICE_DATA") +
+      "&access_duration=24" +
+      "&state=" + encodeURIComponent(state);
+    window.location.href = url;
+  });
+
+  // back from SolarEdge: ?code=...&site_id=... or ?error=...
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get("code");
+  var siteId = params.get("site_id");
+  var error = params.get("error");
+
+  if (code) {
+    var big = $("codeBig");
+    big.textContent = "";
+    for (var i = 0; i < code.length; i += 4) {
+      var part = document.createElement("span");
+      part.textContent = code.slice(i, i + 4);
+      big.appendChild(part);
+    }
+    $("codeLen").textContent = code.length + " tekens, zonder spaties invullen";
+    $("copyCode").addEventListener("click", function () { copy(code, this); });
+    if (siteId) $("siteCell").textContent = siteId;
+    $("result").hidden = false;
+  } else if (error) {
+    var description = params.get("error_description");
+    $("errorText").textContent = error === "access_denied"
+      ? "Je hebt bij SolarEdge geen toestemming gegeven (access_denied)."
+      : "SolarEdge meldt: " + error + (description ? " (" + description + ")" : "");
+    $("errorBox").hidden = false;
+  }
+
+  if (code || error) {
+    // the code works once; remove it from the address bar and the history
+    try { history.replaceState(null, "", window.location.pathname); } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>
