@@ -1,12 +1,18 @@
-/////////             <version>2.0.0</version>
+/////////             <version>2.1.0</version>
 /////////                     GOODWE1                        /////////////
 /////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
-/////////                   By Oepi-Loepi & WickedMaster          ///////////////
+/////////             By Oepi-Loepi & WickedMaster             ///////////////
 /////////  2026-11: Goodwe shut down the classic SEMS portal (semsportal.com)
 /////////  on 2026-09-23 and moved everyone to SEMS+ (semsplus.goodwe.com +
 /////////  eu-gateway.semsportal.com). This rewrites the login/data flow for
 /////////  the new portal. This plugin always picks the first/only station
-/////////  on the account - use GOODWE2 if you need to select by name.
+/////////  (and its first inverter) on the account - use GOODWE2 if you need
+/////////  to select a station by name.
+/////////  v2.1.0: the station "basic/info" call used in v2.0.0 only returns
+/////////  station metadata (name, address, permissions...), not live power
+/////////  or energy totals - that's why "today" kept showing 0. Real data
+/////////  lives per-device (inverter), via the device-status + telemetry +
+/////////  telecounting endpoints instead.
 
 function rightRotate(value, amount) {
 	return (value>>>amount) | (value<<(32 - amount));
@@ -142,6 +148,38 @@ function semsTokenHeader(uid, timestamp, token){
     return "{\"uid\":\"" + uid + "\",\"timestamp\":" + timestamp + ",\"token\":\"" + token + "\",\"client\":\"semsPlusWeb\",\"version\":\"\",\"language\":\"en\"}"
 }
 
+// Collapses a SEMS+ "factors" response ([{factors:[{code,data},...]},...]) into a flat {code: data} map.
+function flattenWebFactors(groups){
+    var factors = {}
+    if (!groups) return factors
+    for (var g = 0; g < groups.length; g++){
+        var group = groups[g]
+        if (!group || !group.factors) continue
+        for (var f = 0; f < group.factors.length; f++){
+            var factor = group.factors[f]
+            if (!factor || factor.data === null || factor.data === undefined) continue
+            if (factor.code) factors[factor.code] = factor.data
+        }
+    }
+    return factors
+}
+
+function semsGet(url, uid, token, timestamp, onDone){
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("token", semsTokenHeader(uid, timestamp, token));
+    xhr.setRequestHeader("X-Signature", semsSignature(uid, token));
+    xhr.setRequestHeader("neutral", "0");
+    xhr.setRequestHeader("currentLang", "en");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            onDone(xhr)
+        }
+    }
+    xhr.send();
+}
+
 function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
 	if (debugOutput) console.log("*********SolarPanel Start Goodwe SEMS+ login")
 	var emptyToken = semsTokenHeader("", 0, "")
@@ -212,7 +250,7 @@ function getStations(uid, token, timestamp, totalValue, siteid){
 						stationId = list[0].id
 					}
 					if (stationId) {
-						getStationInfo(uid, token, timestamp, stationId, totalValue)
+						getDevices(uid, token, timestamp, stationId, totalValue)
 					} else {
 						if (debugOutput) console.log("*********SolarPanel Goodwe no station found")
 						parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
@@ -231,40 +269,114 @@ function getStations(uid, token, timestamp, totalValue, siteid){
 	xhr.send(JSON.stringify({pageIndex:1, pageSize:20}));
 }
 
-function getStationInfo(uid, token, timestamp, stationId, totalValue){
-	if (debugOutput) console.log("*********SolarPanel Start Goodwe getStationInfo: " + stationId)
-	var xhr = new XMLHttpRequest();
-	xhr.withCredentials = true;
-	xhr.open("POST", "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/portal/stations/basic/info?stationId=" + stationId, true);
-	xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-	xhr.setRequestHeader("token", semsTokenHeader(uid, timestamp, token));
-	xhr.setRequestHeader("X-Signature", semsSignature(uid, token));
-	xhr.setRequestHeader("neutral", "0");
-	xhr.setRequestHeader("currentLang", "en");
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState === XMLHttpRequest.DONE) {
-			if (xhr.status === 200) {
-				try {
-					if (debugOutput) console.log(xhr.responseText)
-					var obj = JSON.parse(xhr.responseText)
-					var d = obj.data
-					var today2
-					currentPower = parseInt(d.pac)
-					today2 = Math.floor(d.eDay*1000)
-					totalValue = Math.floor(d.eTotal*1000)
-					if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
-					if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
-					parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
+// Finds the first inverter (or other supported device) on the station, so we know which
+// serial number + deviceType to ask the telemetry/telecounting endpoints about.
+function getDevices(uid, token, timestamp, stationId, totalValue){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe getDevices")
+	var url = "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/stations/device/all-status?stationId=" + stationId
+	semsGet(url, uid, token, timestamp, function(xhr){
+		if (xhr.status === 200) {
+			try {
+				if (debugOutput) console.log(xhr.responseText)
+				var obj = JSON.parse(xhr.responseText)
+				var groups = obj.data && obj.data.deviceDetailList
+				var sn = ""
+				var deviceType = ""
+				if (groups) {
+					// Prefer an INVERTER group; fall back to whichever group has a device.
+					for (var g = 0; g < groups.length && !sn; g++){
+						var group = groups[g]
+						var statusList = group.statusDetailList
+						if (!statusList) continue
+						for (var s = 0; s < statusList.length && !sn; s++){
+							var snList = statusList[s].snList
+							if (snList && snList.length > 0 && (group.deviceType === "INVERTER" || !deviceType)) {
+								sn = snList[0]
+								deviceType = group.deviceType
+								if (group.deviceType === "INVERTER") break
+							}
+						}
+					}
 				}
-				catch (e){
-					currentPower = 0
+				if (sn) {
+					getTelemetry(uid, token, timestamp, sn, deviceType, stationId, totalValue)
+				} else {
+					if (debugOutput) console.log("*********SolarPanel Goodwe no device found")
 					parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 				}
-			} else {
-				if (debugOutput) console.log("*********SolarPanel Goodwe getStationInfo http error: " + xhr.status)
+			}
+			catch (e){
+				currentPower = 0
 				parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 			}
+		} else {
+			if (debugOutput) console.log("*********SolarPanel Goodwe getDevices http error: " + xhr.status)
+			parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 		}
-	}
-	xhr.send("{}");
+	})
+}
+
+// Live power (pAc, in kW -> we convert to W to match the Toon app's conventions).
+function getTelemetry(uid, token, timestamp, sn, deviceType, stationId, totalValue){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe getTelemetry: " + sn)
+	var url = "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/equipments/" + sn + "/telemetry?deviceType=" + deviceType + "&pwId=" + stationId
+	semsGet(url, uid, token, timestamp, function(xhr){
+		if (xhr.status === 200) {
+			try {
+				if (debugOutput) console.log(xhr.responseText)
+				var obj = JSON.parse(xhr.responseText)
+				var factors = flattenWebFactors(obj.data)
+				var currentPower = 0
+				if (factors.pAc !== undefined) currentPower = Math.round(parseFloat(factors.pAc) * 1000)
+				getTelecounting(uid, token, timestamp, sn, deviceType, stationId, totalValue, currentPower, xhr.status)
+			}
+			catch (e){
+				parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+			}
+		} else {
+			if (debugOutput) console.log("*********SolarPanel Goodwe getTelemetry http error: " + xhr.status)
+			parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+		}
+	})
+}
+
+// Today's and lifetime generation (proPvStatsToday / proPvStatsTotal, in kWh -> converted to Wh).
+// GoodWe's /telecounting now requires a single "groups" value per call - combining
+// telecounting_today + telecounting_lifetime in one request is rejected (A0400), so we
+// fetch them one at a time and merge the results.
+function getTelecounting(uid, token, timestamp, sn, deviceType, stationId, totalValue, currentPower, prevStatus){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe getTelecounting: " + sn)
+	var baseUrl = "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/equipments/" + sn + "/telecounting?deviceType=" + deviceType + "&pwId=" + stationId
+	semsGet(baseUrl + "&groups=telecounting_today", uid, token, timestamp, function(xhrToday){
+		var today2 = 0
+		if (xhrToday.status === 200) {
+			try {
+				if (debugOutput) console.log(xhrToday.responseText)
+				var objToday = JSON.parse(xhrToday.responseText)
+				var factorsToday = flattenWebFactors(objToday.data)
+				if (factorsToday.proPvStatsToday !== undefined) today2 = Math.floor(parseFloat(factorsToday.proPvStatsToday) * 1000)
+			}
+			catch (e){}
+		} else {
+			if (debugOutput) console.log("*********SolarPanel Goodwe getTelecounting (today) http error: " + xhrToday.status)
+		}
+		semsGet(baseUrl + "&groups=telecounting_lifetime", uid, token, timestamp, function(xhrLife){
+			var newTotalValue = totalValue
+			var lastStatus = xhrLife.status
+			if (xhrLife.status === 200) {
+				try {
+					if (debugOutput) console.log(xhrLife.responseText)
+					var objLife = JSON.parse(xhrLife.responseText)
+					var factorsLife = flattenWebFactors(objLife.data)
+					if (factorsLife.proPvStatsTotal !== undefined) newTotalValue = Math.floor(parseFloat(factorsLife.proPvStatsTotal) * 1000)
+				}
+				catch (e){}
+			} else {
+				if (debugOutput) console.log("*********SolarPanel Goodwe getTelecounting (lifetime) http error: " + xhrLife.status)
+			}
+			if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
+			if (debugOutput) console.log("*********SolarPanel today: " + today2 + " totalValue: " + newTotalValue)
+			parseReturnData(currentPower,newTotalValue,today2,0,0,0,0,lastStatus,"succes")
+		})
+	})
 }
