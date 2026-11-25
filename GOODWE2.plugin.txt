@@ -1,144 +1,281 @@
-/////////             <version>1.0.1</version>
+/////////             <version>2.0.0</version>
 /////////                     GOODWE2                        /////////////
 /////////  Plugin to extract Goodwe Solar data for Toon  ///////////////
 /////////                   By Oepi-Loepi                  ///////////////
+/////////  2026-11: Goodwe shut down the classic SEMS portal (semsportal.com)
+/////////  on 2026-09-23 and moved everyone to SEMS+ (semsplus.goodwe.com +
+/////////  eu-gateway.semsportal.com). This rewrites the login/data flow for
+/////////  the new portal. Fill in the installation name in SiteID to pick a
+/////////  specific station; leave it empty to fall back to the first one.
 
-	function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
-            if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep1")
-			var http = new XMLHttpRequest()
-            var url = "https://www.semsportal.com/api/v1/Common/CrossLogin";
-            var vars = "{\"account\":\""+userName+"\",\"pwd\":\""+passWord+"\"}"
-            http.open("POST", url, true);
-            http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-            http.setRequestHeader('Token','{"version":"v2.1.0","client":"ios","language":"en"}');
-            http.setRequestHeader('Connection', 'keep-alive');
-            http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
-            http.setRequestHeader('Host', 'www.semsportal.com');
-            http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-            http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
-            http.onreadystatechange = function() { // Call a function when the state changes.
-				if (http.readyState === 4) {
-					if (http.status === 200) {
-						try {
-							var JsonString = http.responseText
-							var JsonObject= JSON.parse(JsonString)
-							var uid = JsonObject.data.uid
-							var token = JsonObject.data.token
-							var timestamp = JsonObject.data.timestamp
-							if (debugOutput) console.log("*********SolarPanel uid : " + uid)
-							if (debugOutput) console.log("*********SolarPanel token : " + token)
-							getStep2(uid,token, timestamp,siteid)
-						}
-						catch (e){
-							currentPower = 0
-							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
-						}
+function rightRotate(value, amount) {
+	return (value>>>amount) | (value<<(32 - amount));
+}
+
+function sha256(ascii) {
+
+    var mathPow = Math.pow;
+    var maxWord = mathPow(2, 32);
+    var lengthProperty = 'length'
+    var i, j; // Used as a counter across the whole file
+    var result = ''
+
+    var words = [];
+    var asciiBitLength = ascii[lengthProperty]*8;
+
+    //* caching results is optional - remove/add slash from front of this line to toggle
+    // Initial hash value: first 32 bits of the fractional parts of the square roots of the first 8 primes
+    // (we actually calculate the first 64, but extra values are just ignored)
+    var hash = sha256.h = sha256.h || [];
+    // Round constants: first 32 bits of the fractional parts of the cube roots of the first 64 primes
+    var k = sha256.k = sha256.k || [];
+    var primeCounter = k[lengthProperty];
+    /*/
+    var hash = [], k = [];
+    var primeCounter = 0;
+    //*/
+
+    var isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = candidate;
+            }
+            hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;
+            k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;
+        }
+    }
+
+    ascii += '\x80' // Append a 1 bit (plus zero padding)
+    while (ascii[lengthProperty]%64 - 56) ascii += '\x00' // More zero padding
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j>>8) return; // ASCII check: only accept characters in range 0-255
+        words[i>>2] |= j << ((3 - i)%4)*8;
+    }
+    words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);
+    words[words[lengthProperty]] = (asciiBitLength)
+
+    // process each chunk
+    for (j = 0; j < words[lengthProperty];) {
+        var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
+        var oldHash = hash;
+        // This is now the "working hash", often labelled as variables a...g
+        // (we have to truncate as well, otherwise extra entries at the end accumulate
+        hash = hash.slice(0, 8);
+
+        for (i = 0; i < 64; i++) {
+            var i2 = i + j;
+            // Expand the message into 64 words
+            // Used below if
+            var w15 = w[i - 15], w2 = w[i - 2];
+
+            // Iterate
+            var a = hash[0], e = hash[4];
+            var temp1 = hash[7]
+                + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) // S1
+                + ((e&hash[5])^((~e)&hash[6])) // ch
+                + k[i]
+                // Expand the message schedule if needed
+                + (w[i] = (i < 16) ? w[i] : (
+                        w[i - 16]
+                        + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3)) // s0
+                        + w[i - 7]
+                        + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10)) // s1
+                    )|0
+                );
+            // This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
+            var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
+                + ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2])); // maj
+
+            hash = [(temp1 + temp2)|0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
+            hash[4] = (hash[4] + temp1)|0;
+        }
+
+        for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i])|0;
+        }
+    }
+
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (hash[i]>>(j*8))&255;
+            result += ((b < 16) ? 0 : '') + b.toString(16);
+        }
+    }
+    return result;
+}
+
+function base64 (input) {
+    var result = '', binData, i;
+    var base64Alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split(''); // Base is 65 in fact :-)
+    if (typeof input === 'string') for (i = 0, input = input.split(''); i < input.length; i++) input[i] = input[i].charCodeAt(0);
+    for (i = 0; i < input.length; i += 3) {
+        binData = (input[i] & 0xFF) << 16 |     // FF.00.00
+                  (input[i + 1] & 0xFF) << 8 |  // 00.FF.00
+                  (input[i + 2] & 0xFF);        // 00.00.FF
+        result += base64Alphabet[(binData & 0xFC0000) >>> 18] +                   //11111100.00000000.00000000 = 0xFC0000 = 16515072
+                  base64Alphabet[(binData & 0x03F000) >>> 12] +                   //00000011.11110000.00000000 = 0x03F000 = 258048
+                  base64Alphabet[( i + 3 >= input.length && (input.length << 1) % 3 === 2 ? 64 :
+                                     (binData & 0x000FC0) >>> 6 )] +              //00000000.00001111.11000000 = 0x000FC0 = 4032
+                  base64Alphabet[( i + 3 >= input.length && (input.length << 1) % 3 ? 64 :
+                                  binData & 0x00003F )];                          //00000000.00000000.00111111 = 0x00003F = 63
+    }
+    return result;
+}
+
+// pwd field GoodWe's SEMS+ login wants: base64 of the ASCII text of the MD5 hex digest of the password.
+function semsPassword(plainPassword){
+    return base64(Qt.md5(plainPassword))
+}
+
+// X-Signature header: base64 of "sha256hex(timestamp@uid@token)@timestamp", recomputed fresh per request.
+function semsSignature(uid, token){
+    var ts = "" + (new Date()).getTime()
+    var hashInput = ts + "@" + uid + "@" + token
+    var sigHash = sha256(hashInput)
+    return base64(sigHash + "@" + ts)
+}
+
+// "token" header: a small JSON blob the gateway expects alongside every authenticated call.
+function semsTokenHeader(uid, timestamp, token){
+    return "{\"uid\":\"" + uid + "\",\"timestamp\":" + timestamp + ",\"token\":\"" + token + "\",\"client\":\"semsPlusWeb\",\"version\":\"\",\"language\":\"en\"}"
+}
+
+function getSolarData(passWord,userName,apiKey,siteid,urlString,totalValue){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe SEMS+ login")
+	var emptyToken = semsTokenHeader("", 0, "")
+	var body = JSON.stringify({account:userName, pwd: semsPassword(passWord), agreement:1, isChinese:false, isLocal:false})
+	var xhr = new XMLHttpRequest();
+	xhr.withCredentials = true;
+	xhr.open("POST", "https://semsplus.goodwe.com/web/sems/sems-user/api/v1/auth/cross-login", true);
+	xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+	xhr.setRequestHeader("Accept", "application/json, text/plain, */*");
+	xhr.setRequestHeader("Origin", "https://semsplus.goodwe.com");
+	xhr.setRequestHeader("Referer", "https://semsplus.goodwe.com/");
+	xhr.setRequestHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+	xhr.setRequestHeader("token", emptyToken);
+	xhr.setRequestHeader("X-Signature", semsSignature("", ""));
+	xhr.setRequestHeader("neutral", "0");
+	xhr.setRequestHeader("currentLang", "en");
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === XMLHttpRequest.DONE) {
+			if (xhr.status === 200) {
+				try {
+					if (debugOutput) console.log(xhr.responseText)
+					var obj = JSON.parse(xhr.responseText)
+					var code = "" + obj.code
+					if (code === "00000" || code === "0" || code === "200") {
+						var uid = obj.data.uid
+						var token = obj.data.token
+						var timestamp = obj.data.timestamp
+						if (debugOutput) console.log("*********SolarPanel Goodwe login ok, uid: " + uid)
+						getStations(uid, token, timestamp, totalValue, siteid)
 					} else {
-						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+						if (debugOutput) console.log("*********SolarPanel Goodwe login failed: " + xhr.responseText)
+						parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 					}
 				}
+				catch (e){
+					currentPower = 0
+					parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+				}
+			} else {
+				if (debugOutput) console.log("*********SolarPanel Goodwe login http error: " + xhr.status)
+				parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 			}
-            http.send(vars);
-    }
-	
-	
-	function getStep2(uid,token, timestamp,siteid){
-        console.log("Start getStep2")
-        var http = new XMLHttpRequest()
-        var url = "https://www.semsportal.com/api/v2/HistoryData/QueryPowerStationByHistory";
-        var vars="{\"page_size\":\"40\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"\",\"powerstation_type\":\"\"}"
-        http.open("POST", url, true);
-        http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-        http.setRequestHeader('Connection', 'keep-alive');
-        http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
-        http.setRequestHeader('Host', 'www.semsportal.com');
-        http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-        http.setRequestHeader('Token', '{"version":"v2.1.0","client":"ios","language":"en","timestamp":"' + timestamp + '","uid":"' + uid + '","token":"' + token + '"}');
-        http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
-        http.onreadystatechange = function() { // Call a function when the state changes.
-			if (http.readyState === 4) {
-				if (http.status === 200) {
-					try {
-						if (debugOutput) console.log(http.responseText)
-						var JsonString = http.responseText
-						var JsonObject= JSON.parse(JsonString)
-						var hasError = JsonObject.hasError
-						var succes = JsonObject.msg
-						if (debugOutput) console.log (JsonObject.hasError)
-						if(!hasError){
-							var inverterID
-							for (var V in JsonObject.data.list ){
-								if (JsonObject.data.list[V].pw_name == siteid){
-								  inverterID = JsonObject.data.list[V].id
-								  if (debugOutput) console.log("found")
-								  if (debugOutput) console.log(inverterID)
+		}
+	}
+	xhr.send(body);
+}
+
+function getStations(uid, token, timestamp, totalValue, siteid){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe getStations")
+	var xhr = new XMLHttpRequest();
+	xhr.withCredentials = true;
+	xhr.open("POST", "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/stations/simple-query", true);
+	xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+	xhr.setRequestHeader("token", semsTokenHeader(uid, timestamp, token));
+	xhr.setRequestHeader("X-Signature", semsSignature(uid, token));
+	xhr.setRequestHeader("neutral", "0");
+	xhr.setRequestHeader("currentLang", "en");
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === XMLHttpRequest.DONE) {
+			if (xhr.status === 200) {
+				try {
+					if (debugOutput) console.log(xhr.responseText)
+					var obj = JSON.parse(xhr.responseText)
+					var list = obj.data.dataList
+					var stationId = ""
+					if (list && list.length > 0) {
+						if (siteid) {
+							// GOODWE2: match the installation name entered in SiteID.
+							for (var v = 0; v < list.length; v++) {
+								if (list[v].stationName == siteid) {
+									stationId = list[v].id
+									if (debugOutput) console.log("*********SolarPanel Goodwe found station: " + stationId)
 								}
 							}
-							getStep3(uid,token,timestamp,inverterID);
-						} else {
-							if (debugOutput) console.log("*********SolarPanel Plugin error")
-							parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
 						}
-					}catch (e){
-						currentPower = 0
-						parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
+						if (!stationId) {
+							// No SiteID given, or no name matched: fall back to the first station.
+							stationId = list[0].id
+						}
 					}
-				} else {
-				   if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-				   parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
+					if (stationId) {
+						getStationInfo(uid, token, timestamp, stationId, totalValue)
+					} else {
+						if (debugOutput) console.log("*********SolarPanel Goodwe no station found")
+						parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+					}
 				}
+				catch (e){
+					currentPower = 0
+					parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+				}
+			} else {
+				if (debugOutput) console.log("*********SolarPanel Goodwe getStations http error: " + xhr.status)
+				parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
 			}
 		}
-        http.send(vars);
-    }
+	}
+	xhr.send(JSON.stringify({pageIndex:1, pageSize:20}));
+}
 
-
-    function getStep3(uid,token, timestamp, inverterID){
-        if (debugOutput) console.log("*********SolarPanel Start getSolarDataStep3")
-		var http = new XMLHttpRequest()
-        var url = "https://www.semsportal.com/api/PowerStationMonitor/QueryPowerStationMonitorForApp";
-        var vars="{\"page_size\":\"5\",\"orderby\":\"\",\"powerstation_status\":\"\",\"key\":\"\",\"page_index\":\"1\",\"powerstation_id\":\"" + inverterID + "\",\"powerstation_type\":\"\"}"
-		http.open("POST", url, true);
-        http.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
-        http.setRequestHeader('Connection', 'keep-alive');
-        http.setRequestHeader('Accept', 'Content-Type: application/json; charset=UTF-8');
-        http.setRequestHeader('Host', 'www.semsportal.com');
-        http.setRequestHeader('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
-        http.setRequestHeader('Token', '{"version":"v2.1.0","client":"ios","language":"en","timestamp":"' + timestamp + '","uid":"' + uid + '","token":"' + token + '"}');
-        http.setUserAgent = "PVMaster/2.1.0 (iPhone; iOS 12.0; Scale/2.00)"
-        http.onreadystatechange = function() { // Call a function when the state changes.
-				if (http.readyState === 4) {
-					if (http.status === 200) {
-						try {
-							var JsonString = http.responseText
-							if (debugOutput) console.log(http.responseText)
-							var JsonObject= JSON.parse(JsonString)
-							var hasError = JsonObject.hasError
-							var succes = JsonObject.msg
-							var today2
-							if (debugOutput) console.log ("*********SolarPanel JsonObject.hasError : " + JsonObject.hasError)
-							if(!hasError){
-								currentPower = parseInt(JsonObject.data[0].pac)
-								today2 = Math.floor((JsonObject.data[0].eday)*1000)
-								totalValue = Math.floor((JsonObject.data[0].etotal)*1000)							
-								if (debugOutput) console.log ("*********SolarPanel currentPower: " + currentPower)
-								if (debugOutput) console.log ("*********SolarPanel totalValue: " + totalValue)
-								parseReturnData(currentPower,totalValue,today2,0,0,0,0,http.status,"succes")
-							} else {
-								if (debugOutput) console.log("*********SolarPanel Plugin error")
-								parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
-							}
-						}
-						catch (e){
-							currentPower = 0
-							parseReturnData(0,totalValue,todayValue,0,0,0,0, http.status,"error")
-						}
-					} else {
-						if (debugOutput) console.log("*********SolarPanel error: " + http.status)
-						parseReturnData(0,totalValue,0,0,0,0,0, http.status,"error")
-					}
+function getStationInfo(uid, token, timestamp, stationId, totalValue){
+	if (debugOutput) console.log("*********SolarPanel Start Goodwe getStationInfo: " + stationId)
+	var xhr = new XMLHttpRequest();
+	xhr.withCredentials = true;
+	xhr.open("POST", "https://eu-gateway.semsportal.com/web/sems/sems-plant/api/portal/stations/basic/info?stationId=" + stationId, true);
+	xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+	xhr.setRequestHeader("token", semsTokenHeader(uid, timestamp, token));
+	xhr.setRequestHeader("X-Signature", semsSignature(uid, token));
+	xhr.setRequestHeader("neutral", "0");
+	xhr.setRequestHeader("currentLang", "en");
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState === XMLHttpRequest.DONE) {
+			if (xhr.status === 200) {
+				try {
+					if (debugOutput) console.log(xhr.responseText)
+					var obj = JSON.parse(xhr.responseText)
+					var d = obj.data
+					var today2
+					currentPower = parseInt(d.pac)
+					today2 = Math.floor(d.eDay*1000)
+					totalValue = Math.floor(d.eTotal*1000)
+					if (debugOutput) console.log("*********SolarPanel currentPower: " + currentPower)
+					if (debugOutput) console.log("*********SolarPanel totalValue: " + totalValue)
+					parseReturnData(currentPower,totalValue,today2,0,0,0,0,xhr.status,"succes")
 				}
+				catch (e){
+					currentPower = 0
+					parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+				}
+			} else {
+				if (debugOutput) console.log("*********SolarPanel Goodwe getStationInfo http error: " + xhr.status)
+				parseReturnData(0,totalValue,0,0,0,0,0, xhr.status,"error")
+			}
 		}
-		http.send(vars);
-    }
+	}
+	xhr.send("{}");
+}
